@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตัวอย่างธีมสี สไลด์ + เอกสาร</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--page:#E9ECEF;--ink:#1F2933;--mute:#6B7785;--line:#D5DAE0}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:12px}
+body{font-family:'Sarabun',sans-serif;background:var(--page);color:var(--ink)}
+
+/* ---------- top nav ---------- */
+.nav{position:relative;z-index:10;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:8px 20px}
+.nav b{font-size:15px;margin-right:8px;white-space:nowrap}
+.nav a{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);font-size:13px;white-space:nowrap;
+  padding:3px 10px 3px 5px;border:1px solid var(--line);border-radius:999px;background:#fff}
+.nav a:hover{border-color:#8893a0}
+.nav i{width:18px;height:18px;border-radius:50%;display:block;background:linear-gradient(135deg,var(--p) 50%,var(--a) 50%)}
+
+/* ---------- theme section ---------- */
+.theme{padding:36px 20px 20px;max-width:1860px;margin:0 auto}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:12px}
+.head h2{font-size:26px;font-weight:700}
+.head h2 span{display:inline-block;background:var(--p);color:var(--onP);border-radius:8px;padding:0 10px;margin-right:10px;font-size:22px}
+.head p{color:var(--mute);font-size:15px}
+.pal{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:18px}
+.pal div{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mute)}
+.pal s{width:22px;height:22px;border-radius:6px;display:block;border:1px solid rgba(0,0,0,.12)}
+.pal code{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink)}
+
+/* scalable stage: designed at 1764 x 1104, scaled to fit */
+.frame{width:100%;overflow:hidden;position:relative}
+.stage{width:1764px;height:1104px;display:grid;grid-template-columns:960px 780px;gap:24px;transform-origin:0 0;position:absolute;left:0;top:0}
+.col{display:flex;flex-direction:column;gap:24px;height:1104px}
+
+/* ---------- slides (1pt = 1px at 960x540) ---------- */
+.slide{width:960px;height:540px;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 2px 14px rgba(0,0,0,.18);
+  font-family:'Sarabun',sans-serif;line-height:1.2;flex:none}
+.slide.open{background:var(--dark);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.slide.open .ico{color:var(--onP);width:96px;height:96px;border-radius:50%;background:var(--p);display:grid;place-items:center;margin-bottom:22px}
+.slide.open .ico svg{width:50px;height:50px}
+.slide.open .kick{color:var(--a);font-weight:700;font-size:15px;letter-spacing:.5px;margin-bottom:12px}
+.slide.open h3{font-size:46px;font-weight:700;line-height:1.3;margin-bottom:20px}
+.pill{display:inline-block;background:var(--p);color:var(--onP);border-radius:999px;padding:7px 26px;font-weight:700;font-size:19px}
+.slide.open .sub{color:var(--sub2);font-size:14px;margin-top:20px}
+.slide.open .sub{color:#9AA7B4}
+
+.slide.body{background:var(--bg);color:var(--txt);padding:34px 48px 0}
+.kicker{color:var(--pT);font-weight:700;font-size:12px;letter-spacing:.4px}
+.slide.body h3{color:var(--txt);font-size:28px;font-weight:700;line-height:1.35;margin-top:6px}
+.row{display:flex;align-items:center;margin-top:16px}
+.card{flex:1;background:var(--card);border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:16px 18px;display:flex;align-items:center;gap:14px;height:112px}
+.card .ico{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:var(--onP)}
+.card .ico svg{width:26px;height:26px}
+.card b{display:block;color:var(--txt);font-size:18px;font-weight:700;line-height:1.3}
+.card small{display:block;color:var(--txt2);font-size:12.5px;line-height:1.35;margin-top:3px}
+.card.hi{background:var(--a);}
+.card.hi b,.card.hi small{color:var(--onA)}
+.card.hi .ico{background:var(--dark);color:#fff}
+.card .f{font-size:20px;font-weight:700;color:var(--onA);margin-top:2px}
+.op{width:44px;text-align:center;color:var(--pT);font-size:32px;font-weight:700;flex:none}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin-top:18px;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:15px}
+.tbl th{color:var(--onP);font-weight:700;padding:9px 12px;text-align:center}
+.tbl td{padding:8px 12px;text-align:center;color:var(--txt);border-top:1px solid var(--bd)}
+.tbl tr.last td{background:var(--ta)}
+.tbl td.res{font-weight:700;color:var(--aT)}
+.note{position:absolute;left:48px;right:48px;bottom:36px;background:var(--ta);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:12px;color:var(--txt);font-size:15px}
+.note .dot{flex:none;width:30px;height:30px;border-radius:50%;background:var(--a);display:grid;place-items:center;color:var(--onA)}
+.note .dot svg{width:16px;height:16px}
+.pn{position:absolute;right:24px;bottom:10px;font-size:11px;color:var(--mut)}
+
+/* ---------- document (A4 ratio 1:1.414 -> 780 x 1104) ---------- */
+.doc{width:780px;height:1104px;background:var(--paper);box-shadow:0 2px 14px rgba(0,0,0,.18);position:relative;overflow:hidden;
+  padding:78px 82px;font-family:'Sarabun',sans-serif;color:var(--txt);font-size:15px;line-height:1.5;flex:none}
+.doc .hd{position:absolute;left:82px;right:82px;top:34px;display:flex;justify-content:space-between;font-size:11.5px;color:#8A939D;
+  border-bottom:1px solid var(--bd);padding-bottom:5px}
+.doc .ft{position:absolute;left:0;right:0;bottom:30px;text-align:center;font-size:12px;color:#8A939D}
+.doc h1{font-size:29px;line-height:1.35;font-weight:700;padding-bottom:6px;border-bottom:3px solid var(--p);margin-bottom:6px}
+.doc h2{font-size:24px;font-weight:700;line-height:1.3;border-left:6px solid var(--a);padding-left:12px;margin:16px 0 5px}
+.doc h3{font-size:18.5px;font-weight:700;color:var(--pT);margin:10px 0 2px}
+.doc p{text-indent:2em;margin:0 0 2px;text-align:left}
+.doc .eq{text-align:center;text-indent:0;font-size:17px;font-weight:600;margin:5px 0;color:var(--txt)}
+.doc .box{background:var(--ta);border-radius:6px;padding:8px 14px;margin:8px 0 4px;text-indent:0}
+.doc .box p{text-indent:0;margin:0}
+.doc .cap{text-align:center;text-indent:0;font-size:14px;font-weight:700;margin:8px 0 4px;color:var(--txt)}
+.doc table{border-collapse:collapse;margin:0 auto;font-size:14px}
+.doc th{background:var(--p);color:var(--onP);padding:3px 12px;border:1px solid var(--p);font-weight:700;text-align:center}
+.doc td{padding:3px 12px;border:1px solid var(--bd);text-align:center}
+.doc td:first-child{background:var(--pt);font-weight:700}
+.doc td.l{text-align:left}
+.doc td.res{font-weight:700;color:var(--aT)}
+.doc .vocab{margin-bottom:2px}
+.doc sup{font-size:.65em;line-height:0}
+
+.rowlabel{max-width:1860px;margin:28px auto 0;padding:0 20px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.rowlabel span{font-size:20px;font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:2px 16px}
+.rowlabel small{color:var(--mute);font-size:14px}
+.divider{max-width:1860px;margin:40px auto 0;padding:0 20px}
+.divider span{display:inline-block;font-size:22px;font-weight:700;background:var(--ink);color:#fff;border-radius:8px;padding:2px 16px}
+.divider p{color:var(--mute);font-size:14px;margin-top:6px}
+.foot{max-width:1000px;margin:10px auto 60px;padding:0 20px;color:var(--mute);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- icon sprites -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 11v6"/><path d="M12 7h.01"/></symbol>
+    <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 20 10 7l4 6 2-3 5 10z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+    <symbol id="i-fork" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a3 3 0 0 0 6 0V3M9 3v18M17 3c-2 2-2.5 5-2.5 8H17v10"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<nav class="nav" id="nav"><b>ธีมสี</b></nav>
+<main id="main"></main>
+<p class="foot">ทุกธีมใช้เนื้อหาเดียวกัน (เรื่อง “ดอกเบี้ยทบต้น”) เปลี่ยนเฉพาะสี &nbsp;·&nbsp; T8–T10 ใช้สีจากไฟล์ตัวอย่างใน Sample &nbsp;·&nbsp; ข้อมูลสีจาก slide-color-themes.md</p>
+
+<script>
+const THEMES = [
+ {id:'T1',name:'เขียว–ส้ม',en:'Green & Orange',use:'วิทยาศาสตร์ สุขภาพ สิ่งแวดล้อม การศึกษาทั่วไป',
+  p:'0B8A74',pd:'2F6FD0',a:'E8890C',aT:'E8890C',dark:'0B1F3A',sub:'4A5B6E',bg:'F2F8F6',pt:'DDF0EB',ta:'FDEBD0',bd:'CFDDD8',mut:'9AA8A4',onA:'0B1F3A'},
+ {id:'T2',name:'ฟ้า–เหลืองอำพัน',en:'Blue & Amber',use:'เทคโนโลยี การเงิน หัวข้อทั่วไป (ค่าเริ่มต้นของ prompt)',
+  p:'0088CC',pd:'0A6AA1',a:'FFB100',aT:'C77D2E',dark:'1C2B39',sub:'5B6B76',bg:'EAF6FD',pt:'EAF6FD',ta:'FFF1CC',bd:'CFE8F5',mut:'9AA8B2',onA:'1C2B39'},
+ {id:'T3',name:'อินดิโก–ปะการัง',en:'Indigo & Coral',use:'ดิจิทัล ดาราศาสตร์ งานสร้างสรรค์ นวัตกรรม',
+  p:'4F46E5',pd:'3730A3',a:'FF6F59',aT:'C9392A',dark:'1E1B4B',sub:'5B5F7A',bg:'F3F2FD',pt:'EDEBFD',ta:'FFE5DF',bd:'DCDAF3',mut:'A3A6BD',onA:'1E1B4B'},
+ {id:'T4',name:'ดินเผา–เขียวเซจ',en:'Terracotta & Sage',use:'ประวัติศาสตร์ วัฒนธรรม ธรณีวิทยา อาหาร',
+  p:'B5532A',pd:'7A3B1E',a:'5F8F6B',aT:'3F6B4B',dark:'2E1F18',sub:'6B5B50',bg:'FBF4EE',pt:'F8E6DB',ta:'E3EFE5',bd:'EBDCCF',mut:'A89A8F',onA:'FFFFFF'},
+ {id:'T5',name:'พลัม–มิ้นต์',en:'Plum & Mint',use:'ศิลปะ ภาษา จิตวิทยา การตลาด',
+  p:'A3246B',pd:'6B1D4B',a:'12A594',aT:'0B7D70',dark:'2B1630',sub:'6B5A66',bg:'FCF2F7',pt:'FADDEA',ta:'D8F3EE',bd:'F2D9E5',mut:'A894A0',onA:'2B1630'},
+ {id:'T6',name:'แดงเข้ม–เทาเหล็ก',en:'Crimson & Charcoal',use:'ธุรกิจ กฎหมาย ความปลอดภัย หัวข้อจริงจัง',
+  p:'C62839',pd:'8C1B2B',a:'6B7C8F',aT:'4A5A6B',dark:'1F2328',sub:'5F6670',bg:'FAF5F5',pt:'FBE6E8',ta:'E8ECF0',bd:'E8DFDF',mut:'A39A9B',onA:'FFFFFF'},
+ {id:'T7',name:'กราไฟต์–เขียวมะนาว',en:'Graphite & Lime',use:'วิศวกรรม รายงานทางการ ข้อมูลและสถิติ',
+  p:'2F3E4E',pd:'1B2733',a:'7CB518',aT:'4D7C0F',dark:'141A1F',sub:'5B6670',bg:'F4F6F7',pt:'E3E9EE',ta:'EDF7D6',bd:'DCE2E7',mut:'98A3AD',onA:'141A1F'},
+ {id:'T8',name:'ส้มภูเขาไฟ–เหลือง',en:'Volcano Orange & Amber',use:'วิทยาศาสตร์โลก ธรณีวิทยา (สีจากสไลด์ตัวอย่าง “ภูเขาไฟและประเทศไทย”)',
+  p:'D9480F',pd:'A63A0B',a:'FFB100',aT:'A36B00',dark:'2B1D1A',sub:'6B5A54',bg:'FFF3EC',pt:'FBE0D2',ta:'FFF1CC',bd:'F0D9CC',mut:'A8A29E',onA:'2B1D1A'},
+ {id:'T9',name:'น้ำเงินจันทร์–เหลือง',en:'Moonlight Blue & Amber',use:'ดาราศาสตร์ ท้องฟ้ายามค่ำคืน (สีจากสไลด์ตัวอย่าง “ข้างขึ้น ข้างแรม”)',
+  p:'4A5BC7',pd:'36408F',a:'FFB100',aT:'A36B00',dark:'1B2140',sub:'5B6275',bg:'EEF1FB',pt:'DEE3F6',ta:'FFF1CC',bd:'D5DAF0',mut:'A9B2E0',onA:'1B2140'},
+ {id:'T10',name:'แดงอิฐ–เขียวมรกต',en:'Brick Red & Teal',use:'ร่างกายมนุษย์ ชีววิทยา (สีจากสไลด์ตัวอย่าง “ระบบย่อยอาหารของมนุษย์”)',
+  p:'D1472A',pd:'A83A1F',a:'12A39A',aT:'0B766F',dark:'2B2024',sub:'6B5E62',bg:'FCEFEA',pt:'F8DDD4',ta:'DDF3F1',bd:'E6D3CC',mut:'B9ACB1',onA:'2B2024'},
+ {id:'S1',r:1,name:'น้ำทะเล–ชมพูกุหลาบ',en:'Ocean Cyan & Rose',use:'สุขภาพ การแพทย์ ท่องเที่ยว งานบริการ',
+  p:'0E7490',pd:'164E63',a:'F43F5E',aT:'BE123C',dark:'0C2530',sub:'4B6470',bg:'F0F9FB',pt:'D6EEF3',ta:'FFE4E9',bd:'C9E4EA',mut:'9DB8C0',onA:'FFFFFF'},
+ {id:'S2',r:1,name:'ม่วงองุ่น–เหลืองมะนาว',en:'Violet & Lemon',use:'งานสร้างสรรค์ เด็กและเยาวชน เทคโนโลยีใหม่ ไอเดีย',
+  p:'6D28D9',pd:'4C1D95',a:'FACC15',aT:'854D0E',dark:'1E1033',sub:'5F5575',bg:'F6F2FE',pt:'E9E0FB',ta:'FEF6C7',bd:'E1D7F5',mut:'A99DC4',onA:'1E1033'},
+ {id:'S3',r:1,name:'เขียวป่า–ส้มพีช',en:'Forest & Peach',use:'ธรรมชาติ เกษตร สิ่งแวดล้อม ความยั่งยืน',
+  p:'2D6A4F',pd:'1B4332',a:'F4A261',aT:'B5651D',dark:'12251C',sub:'51625A',bg:'F1F7F3',pt:'DCEBE2',ta:'FDEBD9',bd:'D0E1D6',mut:'9BB0A5',onA:'12251C'},
+ {id:'S4',r:1,name:'เขียวมะกอก–เหลืองมัสตาร์ด',en:'Olive & Mustard',use:'อาหาร ประวัติศาสตร์ท้องถิ่น งานฝีมือ โทนวินเทจ',
+  p:'6B7A2A',pd:'4A5518',a:'E3B505',aT:'8A6D00',dark:'232712',sub:'5E6446',bg:'F6F7EC',pt:'E7EBCF',ta:'FBF1C7',bd:'DDE1C6',mut:'A5AB8A',onA:'232712'},
+ {id:'S5',r:1,name:'ชมพูเข้ม–ฟ้าสกาย',en:'Magenta Pink & Sky',use:'แฟชั่น ความงาม สื่อสังคม งานเด็ก กิจกรรมสนุก',
+  p:'DB2777',pd:'9D174D',a:'38BDF8',aT:'0369A1',dark:'2A1020',sub:'6B5560',bg:'FDF2F8',pt:'FBD9EA',ta:'E0F2FE',bd:'F5D5E4',mut:'B49AA8',onA:'2A1020'},
+ {id:'P1',r:1,name:'พาสเทลพีช–มิ้นต์',en:'Pastel Peach & Mint',use:'งานเด็ก อาหารและขนม ไลฟ์สไตล์ โทนอบอุ่นนุ่มนวล',
+  p:'F6B8A1',pd:'F2A58C',pT:'C2603F',onP:'3B2A2E',a:'8FD6C2',aT:'2F8F78',dark:'3B2A2E',sub:'7A6A66',bg:'FFF8F4',pt:'FFE9DF',ta:'E2F6EF',bd:'F3DDD2',mut:'BBA9A3',onA:'3B2A2E'},
+ {id:'P2',r:1,name:'พาสเทลลาเวนเดอร์–ครีมเหลือง',en:'Pastel Lavender & Cream',use:'งานสร้างสรรค์ จิตวิทยา สุขภาพจิต เรื่องเล่า',
+  p:'C9B8F0',pd:'B09DE6',pT:'6B4FC9',onP:'2F2650',a:'FBE29A',aT:'9A7400',dark:'2F2650',sub:'6E6790',bg:'F8F6FF',pt:'EEE8FD',ta:'FFF6D6',bd:'E1DAF6',mut:'B3AAD1',onA:'2F2650'},
+ {id:'P3',r:1,name:'พาสเทลฟ้า–ชมพู',en:'Pastel Sky & Pink',use:'การศึกษาเด็ก วิทยาศาสตร์พื้นฐาน กิจกรรมในห้องเรียน',
+  p:'A8D8F0',pd:'8CC6E6',pT:'2A7FB0',onP:'23394B',a:'F8B8CC',aT:'C2456F',dark:'23394B',sub:'5F7384',bg:'F3FAFF',pt:'E0F2FC',ta:'FFE6EE',bd:'D4E8F4',mut:'A7BDCB',onA:'23394B'},
+ {id:'P4',r:1,name:'พาสเทลเขียวเซจ–เหลืองครีม',en:'Pastel Sage & Butter',use:'ธรรมชาติ สุขภาพ สปา อาหารเพื่อสุขภาพ',
+  p:'B7DCC0',pd:'9CCBA9',pT:'2F7A4B',onP:'24382D',a:'F7E3A1',aT:'8C6D0F',dark:'24382D',sub:'5F7367',bg:'F5FAF6',pt:'E4F2E8',ta:'FFF5D1',bd:'D6E7DB',mut:'A9BFB0',onA:'24382D'},
+ {id:'P5',r:1,name:'พาสเทลชมพูลิลลี่–เขียวอ่อน',en:'Pastel Lilac Pink & Mint',use:'ความงาม แฟชั่น งานอีเวนต์ สื่อสังคม',
+  p:'F2B8DA',pd:'E39CC6',pT:'B23A82',onP:'3A2335',a:'B6E3C4',aT:'2F8556',dark:'3A2335',sub:'7A6272',bg:'FFF5FB',pt:'FCE3F1',ta:'E4F6EA',bd:'F3D6E6',mut:'C2A9B8',onA:'3A2335'},
+ {id:'H1',r:1,name:'ดำ–เหลืองสด',en:'Black & Yellow',use:'ห้องเรียนขนาดใหญ่ จอโปรเจกเตอร์ผลสีเพี้ยน ผู้อ่านสายตาไม่ดี',
+  p:'1A1A1A',pd:'4D4D4D',a:'FFD400',aT:'7A5C00',dark:'000000',sub:'333333',bg:'FFFFFF',pt:'EDEDED',ta:'FFF3A8',bd:'999999',mut:'666666',onA:'000000'},
+ {id:'H2',r:1,name:'น้ำเงินเข้ม–ส้มสด',en:'Royal Blue & Orange',use:'เนื้อหาที่ต้องการความชัดเจนสูง การนำเสนอในห้องสว่าง',
+  p:'0033CC',pd:'001A66',a:'FF6A00',aT:'B33C00',dark:'00091F',sub:'2B3350',bg:'FFFFFF',pt:'E6ECFF',ta:'FFE3D1',bd:'9AA8D6',mut:'6B7599',onA:'000000'},
+ {id:'H3',r:1,name:'ม่วงเข้ม–เขียวนีออน',en:'Deep Purple & Neon Green',use:'เทคโนโลยี เกม ดิจิทัล เนื้อหาสำหรับวัยรุ่น',
+  p:'5B00C8',pd:'330080',a:'00E676',aT:'007A3D',dark:'12002B',sub:'3A2F55',bg:'FAF7FF',pt:'EADCFF',ta:'D6FFE8',bd:'B79EE0',mut:'7F6BA3',onA:'12002B'},
+ {id:'H4',r:1,name:'แดงสด–ฟ้าไซแอน',en:'Vivid Red & Cyan',use:'ความปลอดภัย สถานการณ์ฉุกเฉิน ข้อควรระวัง',
+  p:'C00000',pd:'7F0000',a:'00B8D9',aT:'006C80',dark:'000000',sub:'333333',bg:'FFFFFF',pt:'FFE0E0',ta:'D9F5FB',bd:'D9A3A3',mut:'777777',onA:'000000'},
+ {id:'H5',r:1,name:'เขียวเข้ม–เหลืองสด',en:'Deep Green & Yellow',use:'สิ่งแวดล้อม เกษตร เนื้อหาที่ต้องการอ่านชัดกลางแจ้ง',
+  p:'006B3C',pd:'003D22',a:'FFE600',aT:'7A6A00',dark:'001A0E',sub:'2E4A3B',bg:'F5FBF7',pt:'DDF3E6',ta:'FFF9B8',bd:'8FBFA3',mut:'6A8C79',onA:'001A0E'},
+ {id:'D1',name:'ดาร์ก ฟ้า–เหลืองอำพัน',en:'Dark · Blue & Amber',use:'เทคโนโลยี การเงิน นำเสนอในห้องมืด (จาก T2)',
+  p:'0088CC',pd:'0A6AA1',pT:'4DB8F0',a:'FFB100',aT:'FFC53D',dark:'0A121B',bg:'101C28',card:'182838',txt:'E6EEF5',txt2:'9DB0C0',sub:'9DB0C0',pt:'17324A',ta:'3A2E0D',bd:'27394B',mut:'6A7C8C',paper:'101C28',onA:'1C2B39'},
+ {id:'D2',name:'ดาร์ก เขียว–ส้ม',en:'Dark · Green & Orange',use:'วิทยาศาสตร์ สุขภาพ สิ่งแวดล้อม (จาก T1)',
+  p:'0B8A74',pd:'2F6FD0',pT:'3FD1B5',a:'E8890C',aT:'F5A63D',dark:'06141C',bg:'0B1E22',card:'132E33',txt:'E3F3F0',txt2:'9BB8B3',sub:'9BB8B3',pt:'163A40',ta:'3D2A0C',bd:'214248',mut:'6C8985',paper:'0B1E22',onA:'0B1F3A'},
+ {id:'D3',name:'ดาร์ก แดงเข้ม–เทาเหล็ก',en:'Dark · Crimson & Steel',use:'ธุรกิจ กฎหมาย ความปลอดภัย (จาก T6)',
+  p:'C62839',pd:'8C1B2B',pT:'FF6B7A',a:'8DA0B5',aT:'A9BACB',dark:'0D0F12',bg:'16191D',card:'20252B',txt:'F0F2F4',txt2:'A5AEB8',sub:'A5AEB8',pt:'3A1A20',ta:'2A323B',bd:'323A43',mut:'6E7882',paper:'16191D',onA:'14181D'},
+ {id:'D4',name:'ดาร์ก ส้ม–ฟ้าไซแอน',en:'Dark · Orange & Cyan',use:'พลังงาน ภูเขาไฟ อาหาร กิจกรรม (ต้นแบบจาก D1 ฟ้า)',
+  p:'E0560F',pd:'B33F0A',pT:'FF9A5C',a:'22B8CF',aT:'5ED3E6',dark:'120A06',bg:'1C110B',card:'2A1A11',txt:'F8EBDF',txt2:'C9AE9A',sub:'C9AE9A',pt:'4A2511',ta:'0E3A42',bd:'40291B',mut:'8C7060',paper:'1C110B',onA:'06222A'},
+ {id:'D5',name:'ดาร์ก ม่วง–เหลืองทอง',en:'Dark · Purple & Gold',use:'ดาราศาสตร์ ความคิดสร้างสรรค์ งานพรีเมียม (ต้นแบบจาก D1 ฟ้า)',
+  p:'5A189A',pd:'3C096C',pT:'C08BFF',a:'FFD60A',aT:'FFE066',dark:'0C0517',bg:'150B26',card:'21123B',txt:'F1E8FF',txt2:'B7A6D6',sub:'B7A6D6',pt:'3B1B66',ta:'3D3410',bd:'34204F',mut:'7F6AA3',paper:'150B26',onA:'1A0B2E'}
+];
+
+const ROLES = [['p','หลัก'],['pd','หลักเข้ม'],['a','เน้น'],['aT','เน้น (ตัวอักษร)'],['dark','พื้นเข้ม/ตัวอักษร'],['sub','ตัวอักษรรอง'],
+               ['bg','พื้นสไลด์'],['pt','จางสีหลัก'],['ta','จางสีเน้น'],['bd','เส้นขอบ'],['mut','ข้อความจาง']];
+const ic = n => `<svg><use href="#i-${n}"/></svg>`;
+
+function vars(t){
+  return `--p:#${t.p};--pd:#${t.pd};--a:#${t.a};--aT:#${t.aT};--dark:#${t.dark};--sub:#${t.sub};--bg:#${t.bg};--pt:#${t.pt};--ta:#${t.ta};--bd:#${t.bd};--mut:#${t.mut};--onA:#${t.onA};--pT:#${t.pT||t.p};--card:#${t.card||'FFFFFF'};--txt:#${t.txt||t.dark};--txt2:#${t.txt2||t.sub};--paper:#${t.paper||'FFFFFF'};--onP:#${t.onP||'FFFFFF'}`;
+}
+
+const CONTENT = {
+ interest:{
+  k0:'คณิตศาสตร์การเงิน · บทที่ 5', title:'ดอกเบี้ยทบต้น', pill:'ดอกเบี้ยบนดอกเบี้ย', sub:'ทำไมเงินออมจึงโตเร็วขึ้นเรื่อยๆ ตามเวลา', cover:'chart',
+  k:'แนวคิดหลัก', h:'เงินต้นโตเร็วขึ้น เพราะดอกเบี้ยถูกนำไปคิดต่อ', ops:['+','='],
+  cards:[['coins','เงินต้น (P)','เงินที่ฝากตั้งต้น เช่น 10,000 บาท'],['plus','ดอกเบี้ย (r)','คิดจากเงินรวมสะสม อัตรา 5% ต่อปี'],['chart','เงินรวม (A)','A = P(1 + r)<sup>n</sup>']],
+  th:['ปีที่','เงินต้นต้นปี (บาท)','ดอกเบี้ย 5% (บาท)','เงินรวมปลายปี (บาท)'],
+  tr:[['1','10,000.00','500.00','10,500.00'],['2','10,500.00','525.00','11,025.00'],['3','11,025.00','551.25','11,576.25']],
+  note:'ดอกเบี้ยปีที่ 3 มากกว่าปีที่ 1 เพราะคิดจากเงินที่โตขึ้นแล้ว',
+  d:{sub:'คณิตศาสตร์การเงิน',
+   intro:'เมื่อนำเงินไปฝากหรือลงทุน ผลตอบแทนที่ได้อาจคิดได้สองแบบ แบบแรกคิดจากเงินต้นเท่าเดิมทุกปี แบบที่สองนำดอกเบี้ยที่ได้ไปรวมกับเงินต้น แล้วคิดดอกเบี้ยต่อในปีถัดไป เรียกว่าดอกเบี้ยทบต้น ซึ่งทำให้เงินเติบโตเร็วขึ้นเรื่อยๆ',
+   vocab:[['เงินต้น (P)','จำนวนเงินที่ฝากหรือลงทุนตั้งต้น'],['อัตราดอกเบี้ย (r)','ร้อยละของดอกเบี้ยต่อปี เขียนเป็นทศนิยม'],['เงินรวม (A)','เงินต้นรวมดอกเบี้ย ณ สิ้นระยะเวลา n ปี']],
+   sec:'1. การคำนวณดอกเบี้ยทบต้น', h1:'1.1 สูตรเงินรวม',
+   p1:'เมื่อฝากเงินต้น P ที่อัตราดอกเบี้ย r ต่อปี เป็นเวลา n ปี โดยทบดอกเบี้ยทุกปี จะได้เงินรวมตามสูตรด้านล่าง เหตุที่เป็นเช่นนี้เพราะแต่ละปีเงินจะถูกคูณด้วย (1 + r) หนึ่งครั้ง',
+   eq:'A = P(1 + r)<sup>n</sup>', box:'ข้อสังเกต: ยิ่งฝากนานขึ้น ดอกเบี้ยที่ได้ในแต่ละปียิ่งมากขึ้น เพราะฐานที่ใช้คิดโตขึ้นทุกปี',
+   h2:'1.2 เปรียบเทียบกับดอกเบี้ยเชิงเดี่ยว',
+   p2:'ตารางที่ 1 แสดงเงินรวมเมื่อฝาก 10,000 บาท ที่อัตรา 5% ต่อปี จะเห็นว่าส่วนต่างระหว่างสองวิธีเพิ่มขึ้นตามจำนวนปี',
+   cap:'ตารางที่ 1 เงินรวมของดอกเบี้ยเชิงเดี่ยวและดอกเบี้ยทบต้น (บาท)',
+   th:['ปีที่','ดอกเบี้ยเชิงเดี่ยว','ดอกเบี้ยทบต้น'], tr:[['1','10,500.00','10,500.00'],['2','11,000.00','11,025.00'],['3','11,500.00','11,576.25']],
+   sum:'ดอกเบี้ยทบต้นคือการนำดอกเบี้ยไปรวมกับเงินต้นแล้วคิดต่อ ทำให้เงินเติบโตแบบทวีคูณ ยิ่งเริ่มเร็วและฝากนาน ผลต่างยิ่งชัดเจน'}
+ }
+};
+
+function slideOpen(c){return `
+<div class="slide open">
+  <div class="ico">${ic(c.cover)}</div>
+  <div class="kick">${c.k0}</div>
+  <h3>${c.title}</h3>
+  <span class="pill">${c.pill}</span>
+  <div class="sub">${c.sub}</div>
+</div>`}
+
+function slideBody(c){
+  const n=c.th.length, half=Math.ceil(n/2);
+  const th=c.th.map((x,i)=>`<th style="background:var(${i<half?'--p':'--pd'})">${x}</th>`).join('');
+  const rows=c.tr.map((r,ri)=>`<tr${ri==c.tr.length-1?' class="last"':''}>${r.map((x,i)=>`<td${i==n-1&&n==4?' class="res"':''}>${x}</td>`).join('')}</tr>`).join('');
+  const [a,b,r]=c.cards;
+  return `
+<div class="slide body">
+  <div class="kicker">${c.k}</div>
+  <h3>${c.h}</h3>
+  <div class="row">
+    <div class="card"><div class="ico" style="background:var(--p)">${ic(a[0])}</div><div><b>${a[1]}</b><small>${a[2]}</small></div></div>
+    <div class="op">${c.ops[0]}</div>
+    <div class="card"><div class="ico" style="background:var(--pd)">${ic(b[0])}</div><div><b>${b[1]}</b><small>${b[2]}</small></div></div>
+    <div class="op">${c.ops[1]}</div>
+    <div class="card hi"><div class="ico">${ic(r[0])}</div><div><b>${r[1]}</b>${r[2].includes('<sup>')?`<div class="f">${r[2]}</div>`:`<small>${r[2]}</small>`}</div></div>
+  </div>
+  <table class="tbl"><tr>${th}</tr>${rows}</table>
+  <div class="note"><div class="dot">${ic('info')}</div><span><b>ข้อสังเกต:</b> ${c.note}</span></div>
+  <div class="pn">2</div>
+</div>`}
+
+function docPage(c){
+  const d=c.d;
+  const tb=(th,tr,res)=>`<tr>${th.map(x=>`<th>${x}</th>`).join('')}</tr>`+tr.map(r=>`<tr>${r.map((x,i)=>`<td${res&&i==r.length-1?' class="res"':''}>${x}</td>`).join('')}</tr>`).join('');
+  return `
+<div class="doc">
+  <div class="hd"><span>${d.sub}</span><span>${c.title}</span></div>
+  <h1>${c.title}</h1>
+  <h2>บทนำ</h2>
+  <p>${d.intro}</p>
+  <h2>คำศัพท์สำคัญ</h2>
+  <table class="vocab"><tr><th>คำศัพท์</th><th>ความหมาย</th></tr>${d.vocab.map(r=>`<tr><td>${r[0]}</td><td class="l">${r[1]}</td></tr>`).join('')}</table>
+  <h2>${d.sec}</h2>
+  <h3>${d.h1}</h3>
+  <p>${d.p1}</p>
+  <p class="eq">${d.eq}</p>
+  <div class="box"><p>${d.box}</p></div>
+  <h3>${d.h2}</h3>
+  <p>${d.p2}</p>
+  <p class="cap">${d.cap}</p>
+  <table>${tb(d.th,d.tr,c===CONTENT.interest)}</table>
+  <h2>สรุป</h2>
+  <p>${d.sum}</p>
+  <div class="ft">1</div>
+</div>`}
+
+function build(){
+  const nav = document.getElementById('nav'), main = document.getElementById('main');
+  THEMES.forEach(t=>{
+    if(t.id==='S1') nav.insertAdjacentHTML('beforeend','<b style="margin-left:12px">เพิ่มเติม</b>');
+    if(t.id==='P1') nav.insertAdjacentHTML('beforeend','<b style="margin-left:12px">Pastel</b>');
+    if(t.id==='H1') nav.insertAdjacentHTML('beforeend','<b style="margin-left:12px">High Contrast</b>');
+    if(t.id==='D1') nav.insertAdjacentHTML('beforeend','<b style="margin-left:12px">Dark</b>');
+    nav.insertAdjacentHTML('beforeend',`<a href="#${t.id}" style="--p:#${t.p};--a:#${t.a}"><i></i>${t.id} ${t.name}</a>`);
+    const C = CONTENT.interest;
+    const pal = ROLES.map(([k,l])=>`<div><s style="background:#${t[k]}"></s>${l} <code>${t[k]}</code></div>`).join('');
+    if(t.id==='S1') main.insertAdjacentHTML('beforeend','<div class="rowlabel"><span>ธีมเพิ่มเติม S1–S5</span><small>ชุดสีใหม่โทนสดใหม่ ตามหลักการเดิม · ยังไม่อยู่ใน slide-color-themes.md</small></div>');
+    if(t.id==='P1') main.insertAdjacentHTML('beforeend','<div class="rowlabel"><span>Pastel P1–P5</span><small>โทนพาสเทล ตัวอักษรบนสีหลักเป็นสีเข้ม · ยังไม่อยู่ใน slide-color-themes.md</small></div>');
+    if(t.id==='H1') main.insertAdjacentHTML('beforeend','<div class="rowlabel"><span>High Contrast H1–H5</span><small>คอนทราสต์สูง อ่านชัดบนจอโปรเจกเตอร์และห้องสว่าง · ยังไม่อยู่ใน slide-color-themes.md</small></div>');
+    if(t.id==='D1') main.insertAdjacentHTML('beforeend','<div class="rowlabel"><span>Dark D1–D5</span><small>พื้นมืด สไลด์และเอกสารโหมดมืด D1 ฟ้าเป็นต้นแบบ D2 เขียว D3 แดง D4 ส้ม D5 ม่วง · ยังไม่อยู่ใน slide-color-themes.md</small></div>');
+    main.insertAdjacentHTML('beforeend',`
+<section class="theme" id="${t.id}" style="${vars(t)}">
+  <div class="head"><h2><span>${t.id}</span>${t.name} <small style="font-weight:400;color:var(--mute);font-size:16px">${t.en}</small></h2><p>เหมาะกับ: ${t.use}</p></div>
+  <div class="pal">${pal}</div>
+  <div class="frame"><div class="stage">
+    <div class="col">${slideOpen(C)}${slideBody(C)}</div>
+    ${docPage(C)}
+  </div></div>
+</section>`);
+  });
+  fit();
+  document.documentElement.style.setProperty('--navh',(nav.offsetHeight+8)+'px');
+}
+function fit(){
+  document.querySelectorAll('.frame').forEach(f=>{
+    const s = Math.min(1, f.clientWidth/1764);
+    f.querySelector('.stage').style.transform = `scale(${s})`;
+    f.style.height = (1104*s)+'px';
+  });
+}
+build();
+addEventListener('resize',()=>{fit();document.documentElement.style.setProperty('--navh',(document.getElementById('nav').offsetHeight+8)+'px')});
+document.fonts && document.fonts.ready.then(fit);
+</script>
+</body>
+</html>
