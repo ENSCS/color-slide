@@ -52,12 +52,12 @@ body.unpinned #zone{display:block}
 
 /* ---------- panels ---------- */
 .panel{position:fixed;top:calc(var(--barh) + 6px);z-index:30;background:var(--ui);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.22);padding:14px}
-#aa{right:14px;width:300px;display:grid;gap:12px;font-size:14px}
-#aa .row{display:grid;gap:5px}
-#aa .row>span{color:var(--mute);font-size:12px}
-#aa .btns{display:flex;gap:6px}
-#aa .btns button{flex:1}
-#aa input[type=range]{width:100%}
+#aa,#zm{right:14px;width:300px;display:grid;gap:12px;font-size:14px}
+#aa .row,#zm .row{display:grid;gap:5px}
+#aa .row>span,#zm .row>span{color:var(--mute);font-size:12px}
+#aa .btns,#zm .btns{display:flex;gap:6px}
+#aa .btns button,#zm .btns button{flex:1}
+#aa input,#zm input[type=range]{width:100%}
 #toc{left:14px;width:320px;max-height:calc(100vh - var(--barh) - 24px);overflow:auto;padding:8px}
 #toc a{display:block;padding:6px 10px;border-radius:8px;color:inherit;text-decoration:none;font-size:14px;line-height:1.4;cursor:pointer}
 #toc a:hover{background:var(--tint)}
@@ -160,6 +160,7 @@ body.unpinned #zone{display:block}
     <button data-v="sepia" title="ซีเปีย" aria-label="ธีมซีเปีย"></button>
     <button data-v="dark" title="มืด" aria-label="ธีมมืด"></button>
   </div>
+  <button id="btnZoom" hidden title="ปรับขนาด/ความกว้างของหน้า A4">ขนาดหน้า</button>
   <button id="btnAa" hidden title="ตั้งค่าการอ่าน"><b>Aa</b></button>
   <button id="btnPrint" class="hide-s" hidden>พิมพ์ / PDF</button>
   <button id="btnPin" title="ซ่อนแถบเมนู (เอาเมาส์ไปที่ขอบบนเพื่อเรียกกลับมา)">ซ่อนแถบ</button>
@@ -190,6 +191,11 @@ body.unpinned #zone{display:block}
 </section>
 
 <aside class="panel" id="toc" hidden></aside>
+<div class="panel" id="zm" hidden>
+  <div class="row"><span>ขนาดหน้า A4 <b id="zV"></b></span><input type="range" id="zr" min="50" max="250" step="5"></div>
+  <div class="btns"><button id="zDn" aria-label="เล็กลง">−</button><button id="zUp" aria-label="ใหญ่ขึ้น">+</button></div>
+  <div class="btns"><button id="zAuto" title="ย่อให้พอดีจอ ไม่เกิน 100%">อัตโนมัติ</button><button id="zFit" title="ขยายให้เต็มความกว้างจอ">พอดีกว้างจอ</button><button id="z100">100%</button></div>
+</div>
 <div class="panel" id="aa" hidden>
   <div class="row"><span>ตัวอักษร</span><div class="btns"><button id="fsDn" aria-label="เล็กลง">A−</button><button id="fsUp" aria-label="ใหญ่ขึ้น">A+</button></div></div>
   <div class="row"><span>ฟอนต์</span><select id="font">
@@ -202,21 +208,22 @@ body.unpinned #zone{display:block}
   <div class="row"><span>ความกว้างข้อความ <b id="wV"></b> <em style="font-style:normal">(ขยายตามขนาดตัวอักษรเอง ไม่เกินหน้าจอ)</em></span><input type="range" id="w" min="480" max="980" step="20"></div>
   <div class="row"><span>รูปแบบการอ่าน</span><div class="btns" id="viewBtns">
     <button data-v="scroll">เลื่อนลง</button><button data-v="paged">แบ่งหน้า</button></div></div>
+  <button id="resetAa" title="คืนค่าฟอนต์ ขนาด ระยะบรรทัด ความกว้าง และรูปแบบการอ่านเป็นค่าเริ่มต้น">ค่าเริ่มต้น</button>
 </div>
 <input type="file" id="file" accept=".html,.htm,text/html" hidden>
 
 <script>
 const PRISTINE='<!doctype html>\n'+document.documentElement.outerHTML; // untouched copy of this page, used by "export as one file"
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const S={pin:true,theme:'light',fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll',mode:'a4'};
+const S={zoom:0,pin:true,theme:'light',fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll',mode:'a4'};
 /* exported file: the exporter's settings are the starting point; whatever the reader changes is remembered per document */
 const EMB=document.getElementById('embedded-doc');
-let storeKey='docviewer';
+let storeKey='docviewer', EMB_SETTINGS={};
 if(EMB){
   const t=EMB.textContent, tag=t.length+':'+t.slice(0,120)+t.slice(-120); let h=5381;
   for(let i=0;i<tag.length;i++) h=((h<<5)+h+tag.charCodeAt(i))|0;
   storeKey='docviewer-emb:'+(h>>>0).toString(36);
-  try{Object.assign(S,JSON.parse(EMB.dataset.settings||'{}'))}catch(_){}
+  try{ EMB_SETTINGS=JSON.parse(EMB.dataset.settings||'{}'); Object.assign(S,EMB_SETTINGS); }catch(_){}
 }
 const store={get(){try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch(_){return {}}},set(){try{localStorage.setItem(storeKey,JSON.stringify(S))}catch(_){}}};
 Object.assign(S,store.get());
@@ -246,8 +253,9 @@ function loadText(text,name){
   const rd=$('#reader'); rd.removeAttribute('style');
   root.split(';').forEach(p=>{const i=p.indexOf(':');if(i>0){const k=p.slice(0,i).trim();if(['--primary','--primary-dark','--accent','--accent-text'].includes(k))rd.style.setProperty(k,p.slice(i+1).trim())}});
   buildToc();
+  watchLoading();
   $('#empty').hidden=true;
-  ['#btnToc','#modeSeg','#btnAa','#btnPrint','#btnExport'].forEach(s=>$(s).hidden=false);
+  ['#btnToc','#modeSeg','#btnAa','#btnZoom','#btnPrint','#btnExport'].forEach(s=>$(s).hidden=false);
   frameDirty=true; // the A4 frame is filled only while visible: the document's own paginator needs real layout to measure pages
   setMode(S.mode);
 }
@@ -269,7 +277,9 @@ function setMode(m){
   $$('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
   $('#a4').hidden=m!=='a4'; $('#reader').hidden=m!=='reader';
   $('#btnPrint').style.visibility=m==='a4'?'visible':'hidden';
-  $('#btnAa').style.visibility=m==='reader'?'visible':'hidden';
+  $('#btnAa').style.display=m==='reader'?'':'none';
+  $('#btnZoom').style.display=m==='a4'?'':'none';
+  $('#zm').hidden=true;
   $('#aa').hidden=true;
   document.body.style.overflow=(m==='reader'&&S.view==='paged')?'hidden':'';
   if(m==='a4'){ ensureFrame(); fitA4(); } else applyReader();
@@ -280,10 +290,13 @@ $('#btnPrint').onclick=()=>{try{$('#frame').contentWindow.focus();$('#frame').co
 /* ---------- A4 ---------- */
 function fitA4(){
   const f=$('#frame'), st=$('#stage'); if($('#a4').hidden) return;
-  const sc=Math.min(1,(innerWidth)/840);
+  const sc=S.zoom?S.zoom/100:Math.min(1,innerWidth/840); // 0 = automatic: shrink to fit, never enlarge
   let h=900; try{h=Math.max(h,f.contentDocument.documentElement.scrollHeight)}catch(_){}
   f.style.height=h+'px'; st.style.width='840px';
-  st.style.transform='scale('+sc+')'; st.style.marginLeft=Math.max(0,(innerWidth-840*sc)/2)+'px';
+  // the A4 page (794px) sits centred inside the 840px frame; centre the page itself, and only allow sideways scrolling when the page really is wider than the window
+  const pageW=794*sc, wide=pageW>innerWidth;
+  st.style.transform='scale('+sc+')'; st.style.marginLeft=(wide?-23*sc:(innerWidth-840*sc)/2)+'px';
+  $('#a4').style.overflowX=wide?'visible':'clip';
   $('#a4').style.height=(h*sc+var_bar())+'px';
 }
 const var_bar=()=>56;
@@ -305,8 +318,17 @@ function applyReader(){
   if(S.view==='paged') layoutPaged(); else {art.style.transform='';art.style.columnCount='';art.style.height=''}
   store.set();
 }
-function layoutPaged(keepFrac){
+/* images and fonts finish loading after the first layout and make the article longer: re-measure, keeping the reader on the same text */
+let relayoutT;
+function scheduleRelayout(){ clearTimeout(relayoutT); relayoutT=setTimeout(()=>{ if(S.mode==='reader'&&S.view==='paged') layoutPaged(undefined,true); },120); }
+function watchLoading(){
+  $$('#article img').forEach(im=>{ if(!im.complete) im.addEventListener('load',scheduleRelayout,{once:true}); });
+  if(document.fonts){ document.fonts.ready.then(scheduleRelayout); if(!watchLoading.f){ watchLoading.f=true; document.fonts.addEventListener('loadingdone',scheduleRelayout); } }
+}
+function layoutPaged(keepFrac,keepText){
   const wrap=$('#pgwrap'), art=$('#article');
+  let anchor=null;
+  if(keepText){ const wl=wrap.getBoundingClientRect().left; anchor=[...art.children].find(c=>c.getBoundingClientRect().right>wl+2)||null; }
   const frac=keepFrac!==undefined?keepFrac:(pages>1?page/(pages-1):0);
   const spread=innerWidth>=1000, gap=spread?96:64;
   const pad=Math.round(Math.max(24,Math.min(120,innerWidth*0.07)));
@@ -325,6 +347,7 @@ function layoutPaged(keepFrac){
   step=aw+gap;
   pages=Math.max(1,Math.ceil((art.scrollWidth+gap)/step-0.01));
   page=Math.min(pages-1,Math.round(frac*(pages-1)));
+  if(anchor){ const rel=anchor.getBoundingClientRect().left-art.getBoundingClientRect().left; page=Math.max(0,Math.min(pages-1,Math.floor((rel+4)/step))); }
   goPage(page,true);
 }
 function goPage(p,noAnim){
@@ -333,7 +356,11 @@ function goPage(p,noAnim){
   art.style.transform='translateX('+(-page*step)+'px)';
   if(noAnim) requestAnimationFrame(()=>art.style.transition='');
   $('#pInfo').textContent=(page+1)+' / '+pages;
-  $('#gutL').disabled=page<=0; $('#gutR').disabled=page>=pages-1;}
+  $('#gutL').disabled=page<=0; $('#gutR').disabled=page>=pages-1;
+  if(page>=pages-1) setTimeout(()=>{ // safety net: on the last page, make sure nothing is left beyond it (late-loading images / fonts)
+    const art=$('#article'), gap=step-$('#pgwrap').clientWidth;
+    if(S.mode==='reader'&&S.view==='paged'&&Math.ceil((art.scrollWidth+gap)/step-0.01)>pages) layoutPaged(undefined,true);
+  },250);}
 $('#pPrev').onclick=$('#hitL').onclick=$('#gutL').onclick=()=>goPage(page-1);
 $('#pNext').onclick=$('#hitR').onclick=$('#gutR').onclick=()=>goPage(page+1);
 addEventListener('keydown',e=>{
@@ -364,16 +391,49 @@ $('#font').onchange=e=>change(()=>S.font=e.target.value);
 function applyTheme(){document.body.dataset.theme=S.theme;$$('#themeBar button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.theme))}
 $$('#themeBar button').forEach(b=>b.onclick=()=>{S.theme=b.dataset.v;applyTheme();store.set()});
 $$('#viewBtns button').forEach(b=>b.onclick=()=>change(()=>{S.view=b.dataset.v;scrollTo(0,0)}));
-$('#btnAa').onclick=e=>{e.stopPropagation();$('#aa').hidden=!$('#aa').hidden;$('#toc').hidden=true};
-$('#btnToc').onclick=e=>{e.stopPropagation();$('#toc').hidden=!$('#toc').hidden;$('#aa').hidden=true};
-addEventListener('click',e=>{if(!e.target.closest('.panel,#btnAa,#btnToc')){$('#aa').hidden=true;$('#toc').hidden=true;hideBar()}});
+/* the settings panel opens right under its button (the button moves when other buttons appear or disappear) */
+function placePanel(p,btn){
+  if(p.hidden) return;
+  if(innerWidth<760){ p.style.left=''; p.style.right=''; return; }
+  const r=btn.getBoundingClientRect(), w=p.offsetWidth;
+  p.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px'; p.style.right='auto';
+}
+const PANELS=[['#aa','#btnAa'],['#zm','#btnZoom']];
+function togglePanel(id){
+  const p=$(id), open=p.hidden;
+  ['#aa','#zm','#toc'].forEach(q=>$(q).hidden=true);
+  p.hidden=!open;
+  const pair=PANELS.find(x=>x[0]===id); if(pair) placePanel(p,$(pair[1]));
+}
+$('#btnAa').onclick=e=>{e.stopPropagation();togglePanel('#aa')};
+$('#btnZoom').onclick=e=>{e.stopPropagation();syncZoom();togglePanel('#zm')};
+addEventListener('resize',()=>PANELS.forEach(([p,b])=>placePanel($(p),$(b))));
+
+/* A4 page size: 0 = automatic (fit, never enlarge); otherwise a percentage of the real A4 width */
+const zoomNow=()=>S.zoom||Math.round(Math.min(1,innerWidth/840)*100);
+function syncZoom(){ $('#zr').value=zoomNow(); $('#zV').textContent=(S.zoom?'':'อัตโนมัติ · ')+zoomNow()+'%'; $('#btnZoom').textContent='ขนาดหน้า '+zoomNow()+'%'; }
+function setZoom(v){ S.zoom=v?Math.max(50,Math.min(250,Math.round(v))):0; store.set(); syncZoom(); fitA4(); }
+$('#zr').oninput=e=>setZoom(+e.target.value);
+$('#zDn').onclick=()=>setZoom(zoomNow()-10);
+$('#zUp').onclick=()=>setZoom(zoomNow()+10);
+$('#zAuto').onclick=()=>setZoom(0);
+$('#zFit').onclick=()=>setZoom((innerWidth-32)/794*100); // page width = window width minus a 16px margin each side
+$('#z100').onclick=()=>setZoom(100);
+syncZoom();
+addEventListener('resize',syncZoom);
+/* "default" = the app's defaults, or the exporter's choices when this is an exported file */
+const DEFAULTS=Object.assign({fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll'},
+  ['fs','lh','w','font','view'].reduce((o,k)=>{ if(EMB_SETTINGS[k]!==undefined) o[k]=EMB_SETTINGS[k]; return o; },{}));
+$('#resetAa').onclick=()=>{ Object.assign(S,DEFAULTS); applyReader(); };
+$('#btnToc').onclick=e=>{e.stopPropagation();togglePanel('#toc')};
+addEventListener('click',e=>{if(!e.target.closest('.panel,#btnAa,#btnZoom,#btnToc')){$('#aa').hidden=true;$('#zm').hidden=true;$('#toc').hidden=true;hideBar()}});
 
 /* ---------- menu bar: pinned or auto-hide ---------- */
 const barEl=$('.bar'); let barT;
 function showBar(){clearTimeout(barT);barEl.classList.add('show')}
 function hideBar(){
   if(S.pin) return; clearTimeout(barT);
-  barT=setTimeout(()=>{ if(!$('#aa').hidden||!$('#toc').hidden||barEl.matches(':focus-within')||barEl.matches(':hover')) return; barEl.classList.remove('show')},450);
+  barT=setTimeout(()=>{ if(!$('#aa').hidden||!$('#zm').hidden||!$('#toc').hidden||barEl.matches(':focus-within')||barEl.matches(':hover')) return; barEl.classList.remove('show')},450);
 }
 function applyPin(){
   document.body.classList.toggle('unpinned',!S.pin);
@@ -423,9 +483,10 @@ function buildSingle(){
   d.body.classList.add('embedded'); d.body.setAttribute('data-theme',S.theme); if(!S.pin) d.body.classList.add('unpinned');
   const emp=d.getElementById('empty'); emp.hidden=true; emp.innerHTML='';
   d.getElementById('ttl').innerHTML=esc(meta.title)+(meta.series?'<small>'+esc(meta.series)+'</small>':'');
-  ['#btnToc','#modeSeg','#btnAa','#btnPrint'].forEach(q=>d.querySelector(q).hidden=false);
+  ['#btnToc','#modeSeg','#btnAa','#btnZoom','#btnPrint'].forEach(q=>d.querySelector(q).hidden=false);
   d.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===S.mode));
-  d.getElementById('btnAa').style.visibility=S.mode==='reader'?'visible':'hidden';
+  d.getElementById('btnAa').style.display=S.mode==='reader'?'':'none';
+  d.getElementById('btnZoom').style.display=S.mode==='a4'?'':'none';
   d.getElementById('btnPrint').style.visibility=S.mode==='a4'?'visible':'hidden';
   const s=d.createElement('script');
   s.type='application/octet-stream'; s.id='embedded-doc';
