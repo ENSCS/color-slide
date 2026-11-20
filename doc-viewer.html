@@ -36,6 +36,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .seg button:first-child{border-radius:8px 0 0 8px;margin-left:0}
 .seg button:last-child{border-radius:0 8px 8px 0}
 .bar .grow{flex:1}
+body.embedded #btnExport,body.embedded #btnOpen{display:none!important}
 body.unpinned .bar{transform:translateY(-100%);opacity:0;pointer-events:none;box-shadow:none}
 body.unpinned .bar.show,body.unpinned .bar:focus-within{transform:none;opacity:1;pointer-events:auto;box-shadow:0 8px 28px rgba(0,0,0,.14)}
 #zone{position:fixed;top:0;left:0;right:0;height:22px;z-index:19;display:none}
@@ -145,6 +146,7 @@ body.unpinned #zone{display:block}
 </style>
 </head>
 <body data-theme="light">
+<script>try{var _t=JSON.parse(localStorage.getItem('docviewer')||'{}').theme;if(_t)document.body.dataset.theme=_t}catch(e){}</script>
 
 <header class="bar">
   <button id="btnToc" title="สารบัญ" aria-label="สารบัญ" hidden>☰</button>
@@ -161,6 +163,7 @@ body.unpinned #zone{display:block}
   <button id="btnAa" hidden title="ตั้งค่าการอ่าน"><b>Aa</b></button>
   <button id="btnPrint" class="hide-s" hidden>พิมพ์ / PDF</button>
   <button id="btnPin" title="ซ่อนแถบเมนู (เอาเมาส์ไปที่ขอบบนเพื่อเรียกกลับมา)">ซ่อนแถบ</button>
+  <button id="btnExport" class="hide-s" hidden title="บันทึกเป็นไฟล์ .html ไฟล์เดียว รวมเอกสารและตัวเปิดอ่านไว้ด้วยกัน ส่งให้คนอื่นเปิดได้เลย">ส่งออกไฟล์เดียว</button>
   <button id="btnOpen" class="hide-s">เปิดไฟล์</button>
 </header>
 <div id="zone" aria-hidden="true"></div>
@@ -203,11 +206,13 @@ body.unpinned #zone{display:block}
 <input type="file" id="file" accept=".html,.htm,text/html" hidden>
 
 <script>
+const PRISTINE='<!doctype html>\n'+document.documentElement.outerHTML; // untouched copy of this page, used by "export as one file"
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const S={pin:true,theme:'light',fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll',mode:'a4'};
 const store={get(){try{return JSON.parse(localStorage.getItem('docviewer')||'{}')}catch(_){return {}}},set(){try{localStorage.setItem('docviewer',JSON.stringify(S))}catch(_){}}};
 Object.assign(S,store.get());
-let srcText='',meta={title:'',series:''},page=0,pages=1,step=0;
+let srcText='',meta={title:'',series:''},page=0,pages=1,step=0,frameDirty=false;
+function ensureFrame(){ if(frameDirty){ frameDirty=false; $('#frame').srcdoc=srcText; } }
 
 /* ---------- load ---------- */
 function loadText(text,name){
@@ -233,19 +238,19 @@ function loadText(text,name){
   root.split(';').forEach(p=>{const i=p.indexOf(':');if(i>0){const k=p.slice(0,i).trim();if(['--primary','--primary-dark','--accent','--accent-text'].includes(k))rd.style.setProperty(k,p.slice(i+1).trim())}});
   buildToc();
   $('#empty').hidden=true;
-  ['#btnToc','#modeSeg','#btnAa','#btnPrint'].forEach(s=>$(s).hidden=false);
-  $('#frame').srcdoc=text;
+  ['#btnToc','#modeSeg','#btnAa','#btnPrint','#btnExport'].forEach(s=>$(s).hidden=false);
+  frameDirty=true; // the A4 frame is filled only while visible: the document's own paginator needs real layout to measure pages
   setMode(S.mode);
 }
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function $$$(d,sel){return [...d.querySelectorAll(sel)].map(e=>e.innerHTML).join('')}
 function readFile(f){ if(!f) return; const r=new FileReader(); r.onload=()=>loadText(r.result,f.name.replace(/\.html?$/i,'')); r.readAsText(f,'utf-8'); }
-$('#btnOpen').onclick=$('#btnOpen2').onclick=()=>$('#file').click();
+['#btnOpen','#btnOpen2'].forEach(q=>{const b=$(q); if(b) b.onclick=()=>$('#file').click();}); // the drop screen is absent in exported files
 $('#file').onchange=e=>{readFile(e.target.files[0]);e.target.value=''};
 const drop=$('#drop');
-['dragover','dragenter'].forEach(ev=>addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
-['dragleave','drop'].forEach(ev=>addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
-addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
+['dragover','dragenter'].forEach(ev=>addEventListener(ev,e=>{e.preventDefault();if(drop)drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>addEventListener(ev,e=>{e.preventDefault();if(drop)drop.classList.remove('over')}));
+addEventListener('drop',e=>{ if(!document.body.classList.contains('embedded')) readFile(e.dataTransfer.files[0]); });
 const q=new URLSearchParams(location.search).get('src');
 if(q) fetch(q).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>loadText(t,q.split('/').pop())).catch(()=>{$('.drop p').textContent='เปิดไฟล์จากที่อยู่ที่ระบุไม่ได้ กรุณาเลือกไฟล์ด้วยตัวเอง'});
 
@@ -258,7 +263,7 @@ function setMode(m){
   $('#btnAa').style.visibility=m==='reader'?'visible':'hidden';
   $('#aa').hidden=true;
   document.body.style.overflow=(m==='reader'&&S.view==='paged')?'hidden':'';
-  if(m==='a4') fitA4(); else applyReader();
+  if(m==='a4'){ ensureFrame(); fitA4(); } else applyReader();
 }
 $$('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 $('#btnPrint').onclick=()=>{try{$('#frame').contentWindow.focus();$('#frame').contentWindow.print()}catch(_){window.print()}};
@@ -382,9 +387,55 @@ $('#toc').onclick=e=>{
   if(S.view==='scroll') h.scrollIntoView({behavior:'smooth',block:'start'});
   else{ const art=$('#article'), x=h.offsetLeft; goPage(Math.floor(x/step)); }
 };
+/* ---------- export: viewer + document in one self-contained .html ---------- */
+function toB64(str){
+  const bytes=new TextEncoder().encode(str); let bin='';
+  for(let i=0;i<bytes.length;i+=0x8000) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));
+  return btoa(bin);
+}
+function fromB64(b64){ const bin=atob(b64); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return new TextDecoder().decode(u); }
+function buildSingle(){
+  const d=new DOMParser().parseFromString(PRISTINE,'text/html');
+  d.querySelectorAll('#embedded-doc').forEach(e=>e.remove());
+  // the exported file starts as a ready-made reader: drop the "open a file" screen so it never flashes while the document loads
+  d.body.classList.add('embedded'); d.body.setAttribute('data-theme','light');
+  const emp=d.getElementById('empty'); emp.hidden=true; emp.innerHTML='';
+  d.getElementById('ttl').innerHTML=esc(meta.title)+(meta.series?'<small>'+esc(meta.series)+'</small>':'');
+  ['#btnToc','#modeSeg','#btnAa','#btnPrint'].forEach(q=>d.querySelector(q).hidden=false);
+  d.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===S.mode));
+  d.getElementById('btnAa').style.visibility=S.mode==='reader'?'visible':'hidden';
+  d.getElementById('btnPrint').style.visibility=S.mode==='a4'?'visible':'hidden';
+  const s=d.createElement('script');
+  s.type='application/octet-stream'; s.id='embedded-doc';
+  s.setAttribute('data-name',meta.title); s.setAttribute('data-mode',S.mode); s.setAttribute('data-view',S.view);
+  s.textContent=toB64(srcText);
+  d.body.insertBefore(s,d.querySelector('script:not([id])')); // must exist before the viewer script runs
+  d.title=meta.title+(meta.series?' · '+meta.series:'');
+  return '<!doctype html>\n'+d.documentElement.outerHTML;
+}
+function exportSingle(){
+  if(!srcText) return;
+  const blob=new Blob([buildSingle()],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(meta.title||'เอกสาร').replace(/[\\/:*?"<>|]/g,'').trim()+'.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+$('#btnExport').onclick=exportSingle;
+
 applyTheme();
 applyPin();
 applyReader();
+(function openEmbedded(){
+  const e=document.getElementById('embedded-doc'); if(!e) return;
+  document.body.classList.add('embedded'); // exported single file: no "export" / "open file" buttons
+  try{
+    if(e.dataset.mode) S.mode=e.dataset.mode;
+    if(e.dataset.view) S.view=e.dataset.view;
+    loadText(fromB64(e.textContent.trim()),e.dataset.name);
+  }catch(_){}
+})();
 </script>
 </body>
 </html>
