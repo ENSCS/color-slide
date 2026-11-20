@@ -41,6 +41,7 @@
 | [slide-color-themes.md](slide-color-themes.md) | ตารางสีตามบทบาท และบล็อกพร้อมวางของทุกธีม |
 | [slide-prompt-concept-explainer.md](slide-prompt-concept-explainer.md) | prompt สร้างสไลด์ |
 | [word-prompt-companion-doc.md](word-prompt-companion-doc.md) | prompt สร้างเอกสาร Word ประกอบสไลด์ |
+| [html-prompt-companion-doc.md](html-prompt-companion-doc.md) | prompt สร้างเอกสาร HTML ขนาด A4 ประกอบสไลด์ (เปิดในเบราว์เซอร์ หรือพิมพ์เป็น PDF ได้) |
 
 ## สร้างธีมใหม่
 
