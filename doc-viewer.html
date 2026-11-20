@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตัวเปิดเอกสาร A4 / โหมดอ่านง่าย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;700&family=Sarabun:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai+Looped:wght@100;200;300;400;500;600;700&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+<style>
+:root{--barh:56px;--bar:56px}
+[data-theme=light]{--bg:#fff;--fg:#1f2933;--mute:#6b7785;--line:#dde1e6;--tint:#f2f4f7;--atint:#fff4d6;--ui:#f7f8fa;--figbg:transparent}
+[data-theme=sepia]{--bg:#f4ecd8;--fg:#433422;--mute:#8a7960;--line:#dccfb2;--tint:#ebe0c6;--atint:#f0dfae;--ui:#ece2cb;--figbg:#fbf6e9}
+[data-theme=dark]{--bg:#16181c;--fg:#d8dde3;--mute:#8d96a1;--line:#2d3239;--tint:#20242a;--atint:#2f2a1a;--ui:#1d2025;--figbg:#f1f3f5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--fg);transition:background .2s,color .2s}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:14px}
+button:hover{background:var(--tint)}
+select{appearance:none;-webkit-appearance:none;width:100%;cursor:pointer;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a93a0' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--line);border-radius:8px;padding:5px 34px 5px 12px;font-size:14px;line-height:1.5;text-align:left}
+select:hover{background-color:var(--tint)}
+select option{background:var(--ui);color:var(--fg)}
+input[type=range]{accent-color:var(--fg)}
+button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #4A5BC7;outline-offset:1px}
+[hidden]{display:none!important}
+
+/* ---------- bar ---------- */
+.bar{position:fixed;inset:0 0 auto 0;height:var(--barh);z-index:20;transition:transform .38s cubic-bezier(.22,.8,.3,1),opacity .3s ease,box-shadow .38s ease;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--ui);border-bottom:1px solid var(--line)}
+.bar .ttl{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.bar .ttl small{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.seg{display:flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:8px 0 0 8px;margin-left:0}
+.seg button:last-child{border-radius:0 8px 8px 0}
+.bar .grow{flex:1}
+body.unpinned .bar{transform:translateY(-100%);opacity:0;pointer-events:none;box-shadow:none}
+body.unpinned .bar.show,body.unpinned .bar:focus-within{transform:none;opacity:1;pointer-events:auto;box-shadow:0 8px 28px rgba(0,0,0,.14)}
+#zone{position:fixed;top:0;left:0;right:0;height:22px;z-index:19;display:none}
+body.unpinned #zone{display:block}
+
+.themes{display:flex;gap:8px;padding:0 6px}
+.themes button{width:24px;height:24px;padding:0;border-radius:50%;border:2px solid var(--line)}
+.themes button[data-v=light],.themes button[data-v=light]:hover{background:#fff}
+.themes button[data-v=sepia],.themes button[data-v=sepia]:hover{background:#f4ecd8}
+.themes button[data-v=dark],.themes button[data-v=dark]:hover{background:#16181c}
+.themes button:hover{border-color:var(--mute)}
+.themes button.on{border-color:var(--fg)}
+
+/* ---------- panels ---------- */
+.panel{position:fixed;top:calc(var(--barh) + 6px);z-index:30;background:var(--ui);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.22);padding:14px}
+#aa{right:14px;width:300px;display:grid;gap:12px;font-size:14px}
+#aa .row{display:grid;gap:5px}
+#aa .row>span{color:var(--mute);font-size:12px}
+#aa .btns{display:flex;gap:6px}
+#aa .btns button{flex:1}
+#aa input[type=range]{width:100%}
+#toc{left:14px;width:320px;max-height:calc(100vh - var(--barh) - 24px);overflow:auto;padding:8px}
+#toc a{display:block;padding:6px 10px;border-radius:8px;color:inherit;text-decoration:none;font-size:14px;line-height:1.4;cursor:pointer}
+#toc a:hover{background:var(--tint)}
+#toc a.l2{padding-left:26px;color:var(--mute);font-size:13px}
+
+/* ---------- empty ---------- */
+#empty{min-height:100vh;display:grid;place-items:center;padding:calc(var(--bar) + 24px) 20px 24px}
+.drop{max-width:560px;width:100%;text-align:center;border:2px dashed var(--line);border-radius:16px;padding:44px 24px;background:var(--ui)}
+.drop.over{border-color:#4A5BC7;background:var(--tint)}
+.drop h1{font-size:24px;margin-bottom:8px}
+.drop p{color:var(--mute);line-height:1.6;margin-bottom:18px}
+.drop button{background:#4A5BC7;color:#fff;border-color:#4A5BC7;padding:9px 22px;font-size:16px}
+.drop button:hover{background:#36408F}
+
+/* ---------- A4 mode ---------- */
+#a4{padding-top:var(--bar);background:#e6e9ec;min-height:100vh}
+[data-theme=dark] #a4{background:#0e0f12}
+#a4 .stage{transform-origin:0 0;margin:0 auto}
+#a4 iframe{display:block;width:840px;border:0;background:transparent}
+
+/* ---------- reader ---------- */
+#reader{--fs:18px;--lh:1.8;--w:700px;--rf:'Sarabun',sans-serif;padding-top:var(--bar)}
+#reader .article{font-family:var(--rf);font-size:var(--fs);line-height:var(--lh)}
+.article h1{font-size:1.7em;line-height:1.3;margin:0 0 .8em;padding-bottom:.35em;border-bottom:2px solid var(--primary,#4A5BC7)}
+.article h2{font-size:1.4em;line-height:1.3;margin:1.8em 0 .6em;padding-left:.6em;border-left:4px solid var(--accent,#FFB100)}
+.article h3{font-size:1.15em;line-height:1.35;margin:1.4em 0 .4em;color:var(--primary,#4A5BC7)}
+[data-theme=dark] .article h3{filter:brightness(1.5)}
+.article p{margin:0 0 .9em;text-indent:1.6em}
+.article p.flush,.article .note p,.article .choices p{text-indent:0}
+.article ul,.article ol{margin:0 0 1em;padding-left:1.8em}
+.article li{margin-bottom:.25em}
+.article .choices{margin:0 0 1em 1em}
+.article .note{margin:1em 0;padding:.8em 1.1em;border-radius:10px;background:var(--tint)}
+.article .note.accent{background:var(--atint)}
+.article .note p{margin:0}
+.article .blank{margin:.8em 0 1.2em;border:1px dashed var(--mute);border-radius:8px}
+.article figure{margin:1.2em 0;text-align:center;break-inside:avoid}
+.article figure img{max-width:100%;height:auto;background:var(--figbg);border-radius:8px;padding:6px}
+.article figcaption,.article .tcap{font-size:.85em;color:var(--mute);text-indent:0;text-align:center}
+.article figcaption{margin-top:.4em}
+.article .tbl{margin:1em 0;overflow-x:auto;break-inside:avoid}
+.article table{border-collapse:collapse;margin:0 auto;font-size:.88em;line-height:1.45}
+.article th,.article td{border:1px solid var(--line);padding:.35em .7em;text-align:left;vertical-align:middle}
+.article th{background:var(--primary,#4A5BC7);color:#fff;text-align:center}
+.article tbody td:first-child{background:var(--tint);font-weight:700}
+.article td.c{text-align:center}
+.article sup,.article sub{line-height:0}
+
+/* scroll view */
+#reader.scroll .article{max-width:min(calc(var(--w) * var(--fsr,1) + 40px),100%);margin:0 auto;padding:32px 20px 96px}
+
+/* paged view */
+#reader.paged{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#reader.paged .pgwrap{flex:1;min-height:0;margin:14px auto 0;overflow:hidden;position:relative;width:min(100% - 2 * var(--pad,24px),var(--pgw,700px))}
+#reader.paged .article{height:100%;column-fill:auto;column-gap:64px;transition:transform .25s ease;will-change:transform}
+#reader.paged .article>*:first-child{margin-top:0}
+/* tables taller than a page must be allowed to continue on the next page instead of being clipped */
+#reader.paged .article .tbl{overflow:visible;break-inside:auto}
+#reader.paged .article table{max-width:100%}
+#reader.paged .article tr{break-inside:avoid}
+#reader.paged .article thead{display:table-header-group}
+#reader.paged .article figure img{max-height:calc(var(--ph,600px) - 90px)}
+.pgfoot{flex:none;height:44px;display:flex;align-items:center;justify-content:center;gap:14px;color:var(--mute);font-size:13px}
+.pgfoot button{padding:2px 10px}
+.hit{position:absolute;top:0;bottom:0;width:22%;z-index:5;cursor:pointer;border:0;background:none}
+.hit.l{left:0}.hit.r{right:0}
+.hit,.hit:hover{background:none;border:0;border-radius:0;padding:0}
+/* page-turn arrows: sit in the side padding when there is room, overlap the text edge when there is not */
+#reader.paged{position:relative}
+.gut,.gut:hover{position:absolute;top:var(--bar);bottom:44px;width:max(var(--pad,24px),56px);z-index:6;display:none;align-items:center;border:0;border-radius:0;padding:0;background:none;color:var(--fg);font-size:56px;line-height:1;font-weight:300;cursor:pointer}
+#reader.paged .gut{display:flex}
+.gut.l{left:0;justify-content:center}
+.gut.r{right:0;justify-content:center}
+.gut span{display:block;opacity:.38;transition:opacity .15s,transform .15s;padding-bottom:.1em}
+.gut:hover span{opacity:.9;transform:scale(1.12)}
+.gut:disabled{cursor:default}
+.gut:disabled span{opacity:.1;transform:none}
+#reader.scroll .pgwrap{display:contents}
+#reader.scroll .hit,#reader.scroll .pgfoot{display:none}
+
+@media (max-width:760px){
+  .bar .hide-s{display:none}
+  .bar .ttl{font-size:14px}
+  #toc,#aa{left:8px;right:8px;width:auto}
+}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="bar">
+  <button id="btnToc" title="สารบัญ" aria-label="สารบัญ" hidden>☰</button>
+  <div class="ttl" id="ttl">ตัวเปิดเอกสาร<small>A4 / โหมดอ่านง่าย</small></div>
+  <div class="seg" id="modeSeg" hidden>
+    <button data-mode="a4" class="on">A4</button>
+    <button data-mode="reader">อ่านง่าย</button>
+  </div>
+  <div class="themes" id="themeBar" role="group" aria-label="ธีมสี">
+    <button data-v="light" title="ขาว" aria-label="ธีมขาว"></button>
+    <button data-v="sepia" title="ซีเปีย" aria-label="ธีมซีเปีย"></button>
+    <button data-v="dark" title="มืด" aria-label="ธีมมืด"></button>
+  </div>
+  <button id="btnAa" hidden title="ตั้งค่าการอ่าน"><b>Aa</b></button>
+  <button id="btnPrint" class="hide-s" hidden>พิมพ์ / PDF</button>
+  <button id="btnPin" title="ซ่อนแถบเมนู (เอาเมาส์ไปที่ขอบบนเพื่อเรียกกลับมา)">ซ่อนแถบ</button>
+  <button id="btnOpen" class="hide-s">เปิดไฟล์</button>
+</header>
+<div id="zone" aria-hidden="true"></div>
+
+<section id="empty">
+  <div class="drop" id="drop">
+    <h1>เปิดเอกสาร HTML ขนาด A4</h1>
+    <p>ลากไฟล์ .html ที่สร้างจาก prompt เอกสารมาวางที่นี่ แล้วเลือกดูแบบหน้ากระดาษ A4 หรือโหมดอ่านง่ายที่ปรับขนาดตัวอักษร สีพื้น และแบ่งหน้าได้เหมือนอ่านอีบุ๊ก ไฟล์ไม่ถูกอัปโหลดไปที่ไหน อ่านในเครื่องของคุณเท่านั้น</p>
+    <button id="btnOpen2">เลือกไฟล์</button>
+  </div>
+</section>
+
+<section id="a4" hidden><div class="stage" id="stage"><iframe id="frame" title="เอกสาร A4"></iframe></div></section>
+
+<section id="reader" class="scroll" hidden>
+  <button class="gut l" id="gutL" aria-label="หน้าก่อนหน้า"><span>‹</span></button>
+  <button class="gut r" id="gutR" aria-label="หน้าถัดไป"><span>›</span></button>
+  <div class="pgwrap" id="pgwrap">
+    <button class="hit l" id="hitL" aria-label="หน้าก่อนหน้า" tabindex="-1"></button>
+    <button class="hit r" id="hitR" aria-label="หน้าถัดไป" tabindex="-1"></button>
+    <article class="article" id="article"></article>
+  </div>
+  <div class="pgfoot"><button id="pPrev">‹</button><span id="pInfo"></span><button id="pNext">›</button></div>
+</section>
+
+<aside class="panel" id="toc" hidden></aside>
+<div class="panel" id="aa" hidden>
+  <div class="row"><span>ตัวอักษร</span><div class="btns"><button id="fsDn" aria-label="เล็กลง">A−</button><button id="fsUp" aria-label="ใหญ่ขึ้น">A+</button></div></div>
+  <div class="row"><span>ฟอนต์</span><select id="font">
+    <option value="'Sarabun',sans-serif">Sarabun (มีหัว)</option>
+    <option value="'IBM Plex Sans Thai Looped',sans-serif">IBM Plex Sans Thai Looped (มีหัว)</option>
+    <option value="'Noto Serif Thai',serif">Noto Serif Thai (มีหัว)</option>
+    <option value="'Kanit',sans-serif">Kanit (ไม่มีหัว)</option>
+    <option value="'Noto Sans Thai',sans-serif">Noto Sans Thai (ไม่มีหัว)</option></select></div>
+  <div class="row"><span>ระยะบรรทัด <b id="lhV"></b></span><input type="range" id="lh" min="1.4" max="2.4" step="0.1"></div>
+  <div class="row"><span>ความกว้างข้อความ <b id="wV"></b> <em style="font-style:normal">(ขยายตามขนาดตัวอักษรเอง ไม่เกินหน้าจอ)</em></span><input type="range" id="w" min="480" max="980" step="20"></div>
+  <div class="row"><span>รูปแบบการอ่าน</span><div class="btns" id="viewBtns">
+    <button data-v="scroll">เลื่อนลง</button><button data-v="paged">แบ่งหน้า</button></div></div>
+</div>
+<input type="file" id="file" accept=".html,.htm,text/html" hidden>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const S={pin:true,theme:'light',fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll',mode:'a4'};
+const store={get(){try{return JSON.parse(localStorage.getItem('docviewer')||'{}')}catch(_){return {}}},set(){try{localStorage.setItem('docviewer',JSON.stringify(S))}catch(_){}}};
+Object.assign(S,store.get());
+let srcText='',meta={title:'',series:''},page=0,pages=1,step=0;
+
+/* ---------- load ---------- */
+function loadText(text,name){
+  srcText=text;
+  const d=new DOMParser().parseFromString(text,'text/html');
+  const main=d.getElementById('doc');
+  meta.title=(main&&main.dataset.title)||d.title||name||'เอกสาร';
+  meta.series=(main&&main.dataset.series)||'';
+  document.title=meta.title+' · ตัวเปิดเอกสาร';
+  $('#ttl').innerHTML=esc(meta.title)+(meta.series?'<small>'+esc(meta.series)+'</small>':'');
+  // content for reader (no scripts run)
+  let html;
+  if(main) html=main.innerHTML;
+  else if(d.querySelector('.page-body')) html=$$$(d,'.page-body');
+  else html=d.body.innerHTML;
+  const tmp=document.createElement('div'); tmp.innerHTML=html;
+  tmp.querySelectorAll('script,style,link').forEach(e=>e.remove());
+  $('#article').innerHTML=tmp.innerHTML;
+  // carry only the document's brand colours (tints/lines/ink come from the reader theme so dark mode stays readable)
+  const css=[...d.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+  const root=(css.match(/:root\s*\{([^}]*)\}/)||[])[1]||'';
+  const rd=$('#reader'); rd.removeAttribute('style');
+  root.split(';').forEach(p=>{const i=p.indexOf(':');if(i>0){const k=p.slice(0,i).trim();if(['--primary','--primary-dark','--accent','--accent-text'].includes(k))rd.style.setProperty(k,p.slice(i+1).trim())}});
+  buildToc();
+  $('#empty').hidden=true;
+  ['#btnToc','#modeSeg','#btnAa','#btnPrint'].forEach(s=>$(s).hidden=false);
+  $('#frame').srcdoc=text;
+  setMode(S.mode);
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function $$$(d,sel){return [...d.querySelectorAll(sel)].map(e=>e.innerHTML).join('')}
+function readFile(f){ if(!f) return; const r=new FileReader(); r.onload=()=>loadText(r.result,f.name.replace(/\.html?$/i,'')); r.readAsText(f,'utf-8'); }
+$('#btnOpen').onclick=$('#btnOpen2').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{readFile(e.target.files[0]);e.target.value=''};
+const drop=$('#drop');
+['dragover','dragenter'].forEach(ev=>addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
+const q=new URLSearchParams(location.search).get('src');
+if(q) fetch(q).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>loadText(t,q.split('/').pop())).catch(()=>{$('.drop p').textContent='เปิดไฟล์จากที่อยู่ที่ระบุไม่ได้ กรุณาเลือกไฟล์ด้วยตัวเอง'});
+
+/* ---------- mode ---------- */
+function setMode(m){
+  S.mode=m; store.set();
+  $$('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  $('#a4').hidden=m!=='a4'; $('#reader').hidden=m!=='reader';
+  $('#btnPrint').style.visibility=m==='a4'?'visible':'hidden';
+  $('#btnAa').style.visibility=m==='reader'?'visible':'hidden';
+  $('#aa').hidden=true;
+  document.body.style.overflow=(m==='reader'&&S.view==='paged')?'hidden':'';
+  if(m==='a4') fitA4(); else applyReader();
+}
+$$('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$('#btnPrint').onclick=()=>{try{$('#frame').contentWindow.focus();$('#frame').contentWindow.print()}catch(_){window.print()}};
+
+/* ---------- A4 ---------- */
+function fitA4(){
+  const f=$('#frame'), st=$('#stage'); if($('#a4').hidden) return;
+  const sc=Math.min(1,(innerWidth)/840);
+  let h=900; try{h=Math.max(h,f.contentDocument.documentElement.scrollHeight)}catch(_){}
+  f.style.height=h+'px'; st.style.width='840px';
+  st.style.transform='scale('+sc+')'; st.style.marginLeft=Math.max(0,(innerWidth-840*sc)/2)+'px';
+  $('#a4').style.height=(h*sc+var_bar())+'px';
+}
+const var_bar=()=>56;
+$('#frame').addEventListener('load',()=>{
+  fitA4(); let n=0; const t=setInterval(()=>{fitA4(); if(++n>12)clearInterval(t)},400);
+  try{new ResizeObserver(fitA4).observe($('#frame').contentDocument.body)}catch(_){}
+});
+
+/* ---------- reader ---------- */
+function applyReader(){
+  const rd=$('#reader'), art=$('#article');
+  applyTheme();
+  rd.style.setProperty('--fs',S.fs+'px'); rd.style.setProperty('--fsr',S.fs/18); rd.style.setProperty('--lh',S.lh); rd.style.setProperty('--w',S.w+'px'); rd.style.setProperty('--rf',S.font);
+  rd.classList.toggle('scroll',S.view==='scroll'); rd.classList.toggle('paged',S.view==='paged');
+  $('#lh').value=S.lh; $('#lhV').textContent=S.lh; $('#w').value=S.w; $('#wV').textContent=S.w+'px'; $('#font').value=S.font;
+  $$('#viewBtns button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view));
+  document.body.style.overflow=(S.mode==='reader'&&S.view==='paged')?'hidden':'';
+  if(S.mode!=='reader') return;
+  if(S.view==='paged') layoutPaged(); else {art.style.transform='';art.style.columnCount='';art.style.height=''}
+  store.set();
+}
+function layoutPaged(keepFrac){
+  const wrap=$('#pgwrap'), art=$('#article');
+  const frac=keepFrac!==undefined?keepFrac:(pages>1?page/(pages-1):0);
+  const spread=innerWidth>=1000, gap=spread?96:64;
+  const pad=Math.round(Math.max(24,Math.min(120,innerWidth*0.07)));
+  const avail=innerWidth-2*pad;
+  $('#reader').style.setProperty('--pad',pad+'px');
+  art.style.columnGap=gap+'px';
+  const sw=S.w*S.fs/18;
+  const colW=spread?Math.min(sw,(avail-gap)/2):sw;
+  const W=spread?colW*2+gap:Math.min(sw,avail);
+  wrap.style.setProperty('--pgw',W+'px');
+  art.style.transform='translateX(0)';
+  const aw=wrap.clientWidth;
+  art.style.columnCount=spread?2:1;
+  art.style.columnWidth='';
+  wrap.style.setProperty('--ph',wrap.clientHeight+'px');
+  step=aw+gap;
+  pages=Math.max(1,Math.ceil((art.scrollWidth+gap)/step-0.01));
+  page=Math.min(pages-1,Math.round(frac*(pages-1)));
+  goPage(page,true);
+}
+function goPage(p,noAnim){
+  page=Math.max(0,Math.min(pages-1,p));
+  const art=$('#article'); if(noAnim) art.style.transition='none';
+  art.style.transform='translateX('+(-page*step)+'px)';
+  if(noAnim) requestAnimationFrame(()=>art.style.transition='');
+  $('#pInfo').textContent=(page+1)+' / '+pages;
+  $('#gutL').disabled=page<=0; $('#gutR').disabled=page>=pages-1;}
+$('#pPrev').onclick=$('#hitL').onclick=$('#gutL').onclick=()=>goPage(page-1);
+$('#pNext').onclick=$('#hitR').onclick=$('#gutR').onclick=()=>goPage(page+1);
+addEventListener('keydown',e=>{
+  if(S.mode!=='reader'||S.view!=='paged'||e.target.matches('input,select')) return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();goPage(page+1)}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();goPage(page-1)}
+});
+let rz; addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(S.mode==='a4')fitA4();else if(S.view==='paged')layoutPaged()},150)});
+function change(fn){fn();applyReader()}
+$('#fsUp').onclick=()=>change(()=>S.fs=Math.min(30,S.fs+1));
+$('#fsDn').onclick=()=>change(()=>S.fs=Math.max(13,S.fs-1));
+$('#lh').oninput=e=>change(()=>S.lh=+e.target.value);
+$('#w').oninput=e=>change(()=>S.w=+e.target.value);
+$('#font').onchange=e=>change(()=>S.font=e.target.value);
+function applyTheme(){document.body.dataset.theme=S.theme;$$('#themeBar button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.theme))}
+$$('#themeBar button').forEach(b=>b.onclick=()=>{S.theme=b.dataset.v;applyTheme();store.set()});
+$$('#viewBtns button').forEach(b=>b.onclick=()=>change(()=>{S.view=b.dataset.v;scrollTo(0,0)}));
+$('#btnAa').onclick=e=>{e.stopPropagation();$('#aa').hidden=!$('#aa').hidden;$('#toc').hidden=true};
+$('#btnToc').onclick=e=>{e.stopPropagation();$('#toc').hidden=!$('#toc').hidden;$('#aa').hidden=true};
+addEventListener('click',e=>{if(!e.target.closest('.panel,#btnAa,#btnToc')){$('#aa').hidden=true;$('#toc').hidden=true;hideBar()}});
+
+/* ---------- menu bar: pinned or auto-hide ---------- */
+const barEl=$('.bar'); let barT;
+function showBar(){clearTimeout(barT);barEl.classList.add('show')}
+function hideBar(){
+  if(S.pin) return; clearTimeout(barT);
+  barT=setTimeout(()=>{ if(!$('#aa').hidden||!$('#toc').hidden||barEl.matches(':focus-within')||barEl.matches(':hover')) return; barEl.classList.remove('show')},450);
+}
+function applyPin(){
+  document.body.classList.toggle('unpinned',!S.pin);
+  $('#btnPin').textContent=S.pin?'ซ่อนแถบ':'ตรึงแถบ';
+  $('#btnPin').title=S.pin?'ซ่อนแถบเมนู (เอาเมาส์ไปที่ขอบบนเพื่อเรียกกลับมา)':'ตรึงแถบเมนูไว้ด้านบนตลอด';
+  barEl.classList.remove('show'); store.set(); // layout never changes: the bar space stays reserved, the bar just fades away
+}
+$('#btnPin').onclick=e=>{
+  e.stopPropagation(); S.pin=!S.pin; applyPin();
+  if(!S.pin){ clearTimeout(barT); barEl.classList.remove('show'); e.currentTarget.blur(); } // hide right away, even though the pointer is still on the bar
+};
+$('#zone').addEventListener('mouseenter',showBar);
+$('#zone').addEventListener('click',showBar);
+addEventListener('mousemove',e=>{ if(!S.pin&&e.clientY<22) showBar(); });
+barEl.addEventListener('mouseenter',showBar);
+barEl.addEventListener('mouseleave',hideBar);
+barEl.addEventListener('focusout',hideBar);
+
+/* ---------- toc ---------- */
+function buildToc(){
+  const hs=$$('#article h2,#article h3');
+  $('#toc').innerHTML=hs.map((h,i)=>{h.id='h'+i;return '<a data-i="'+i+'" class="'+(h.tagName==='H3'?'l2':'')+'">'+esc(h.textContent)+'</a>'}).join('')||'<a>ไม่พบหัวข้อ</a>';
+}
+$('#toc').onclick=e=>{
+  const a=e.target.closest('a[data-i]'); if(!a) return;
+  const h=document.getElementById('h'+a.dataset.i); $('#toc').hidden=true;
+  if(S.mode==='a4'){ // find heading in iframe by text
+    try{const d=$('#frame').contentDocument;const t=h.textContent.trim();
+      const el=[...d.querySelectorAll('h2,h3')].find(x=>x.textContent.trim()===t);
+      if(el){const sc=Math.min(1,innerWidth/840);scrollTo({top:(el.getBoundingClientRect().top+d.defaultView.scrollY)*sc+var_bar()-8,behavior:'smooth'})}}catch(_){}
+    return;
+  }
+  if(S.view==='scroll') h.scrollIntoView({behavior:'smooth',block:'start'});
+  else{ const art=$('#article'), x=h.offsetLeft; goPage(Math.floor(x/step)); }
+};
+applyTheme();
+applyPin();
+applyReader();
+</script>
+</body>
+</html>
