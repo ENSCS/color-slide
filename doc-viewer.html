@@ -59,9 +59,24 @@ body.unpinned #zone{display:block}
 #aa .btns button,#zm .btns button{flex:1}
 #aa input,#zm input[type=range]{width:100%}
 #toc{left:14px;width:320px;max-height:calc(100vh - var(--barh) - 24px);overflow:auto;padding:8px}
-#toc a{display:block;padding:6px 10px;border-radius:8px;color:inherit;text-decoration:none;font-size:14px;line-height:1.4;cursor:pointer}
-#toc a:hover{background:var(--tint)}
-#toc a.l2{padding-left:26px;color:var(--mute);font-size:13px}
+#toc .tools{display:flex;gap:6px;padding:0 2px 8px;margin-bottom:6px;border-bottom:1px solid var(--line);position:sticky;top:-8px;background:var(--ui);z-index:1;padding-top:8px;margin-top:-8px}
+#toc .tools button{flex:1;padding:4px 8px;font-size:13px}
+#toc .tr{display:flex;align-items:flex-start;border-radius:8px}
+#toc .tr:hover{background:var(--tint)}
+#toc .tr.cur{background:var(--atint)}
+#toc .tw{flex:none;width:26px;height:30px;padding:0;border:0;border-radius:8px;color:var(--mute);font-size:13px;line-height:30px;transition:transform .15s}
+#toc .tw:hover{background:transparent;color:var(--fg)}
+#toc .tw::before{content:'▸'}
+#toc .g.open>.tr>.tw{transform:rotate(90deg)}
+#toc .sp{flex:none;width:26px}
+#toc a{flex:1;min-width:0;display:block;padding:6px 10px 6px 2px;color:inherit;text-decoration:none;font-size:14px;line-height:1.4;cursor:pointer}
+#toc .g[data-lv="0"]>.tr>a{font-weight:700}
+#toc .g[data-lv="1"]>.tr>a{font-size:14px}
+#toc .g[data-lv="2"]>.tr>a{color:var(--mute);font-size:13px}
+#toc .g>.kids{display:none;margin-left:13px;border-left:1px solid var(--line);padding-left:2px}
+#toc .g.open>.kids{display:block}
+#toc>.kids-root>.g>.kids{margin-left:13px}
+#toc .em{padding:8px 10px;color:var(--mute);font-size:14px}
 
 /* ---------- empty ---------- */
 #empty{min-height:100vh;display:grid;place-items:center;padding:calc(var(--bar) + 24px) 20px 24px}
@@ -273,6 +288,8 @@ if(q) fetch(q).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>loadText(t,q.
 
 /* ---------- mode ---------- */
 function setMode(m){
+  // leaving A4 while the document is still paginating (a big book takes a few seconds): its page height was measured on a hidden layout and would be wrong, so load it again on return
+  if(m!=='a4'&&srcText&&!$('#a4').hidden){ try{ if(!$('#frame').contentDocument.body.dataset.pages) frameDirty=true }catch(_){} }
   S.mode=m; store.set();
   $$('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
   $('#a4').hidden=m!=='a4'; $('#reader').hidden=m!=='reader';
@@ -425,7 +442,7 @@ addEventListener('resize',syncZoom);
 const DEFAULTS=Object.assign({fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll'},
   ['fs','lh','w','font','view'].reduce((o,k)=>{ if(EMB_SETTINGS[k]!==undefined) o[k]=EMB_SETTINGS[k]; return o; },{}));
 $('#resetAa').onclick=()=>{ Object.assign(S,DEFAULTS); applyReader(); };
-$('#btnToc').onclick=e=>{e.stopPropagation();togglePanel('#toc')};
+$('#btnToc').onclick=e=>{e.stopPropagation();togglePanel('#toc'); if(!$('#toc').hidden) syncToc()};
 addEventListener('click',e=>{if(!e.target.closest('.panel,#btnAa,#btnZoom,#btnToc')){$('#aa').hidden=true;$('#zm').hidden=true;$('#toc').hidden=true;hideBar()}});
 
 /* ---------- menu bar: pinned or auto-hide ---------- */
@@ -453,20 +470,69 @@ barEl.addEventListener('mouseleave',hideBar);
 barEl.addEventListener('focusout',hideBar);
 
 /* ---------- toc ---------- */
+// A combined book has several h1 (one per chapter): then the contents are a 3-level tree (chapter > section > sub-section), each level foldable.
+// A single document keeps its one h1 as the title and shows h2 > h3.
+let TOC_SEL='h2,h3';
+const hLabel=h=>[...h.childNodes].map(n=>n.textContent.trim()).filter(Boolean).join(' ');
 function buildToc(){
-  const hs=$$('#article h2,#article h3');
-  $('#toc').innerHTML=hs.map((h,i)=>{h.id='h'+i;return '<a data-i="'+i+'" class="'+(h.tagName==='H3'?'l2':'')+'">'+esc(h.textContent)+'</a>'}).join('')||'<a>ไม่พบหัวข้อ</a>';
+  TOC_SEL=$$('#article h1').length>1?'h1,h2,h3':'h2,h3';
+  const hs=$$('#article '+TOC_SEL.split(',').join(',#article '));
+  const base=TOC_SEL==='h1,h2,h3'?1:2; // the heading level shown at depth 0
+  const root=document.createElement('div'); root.className='kids-root';
+  const stack=[]; // {lv, kids}
+  hs.forEach((h,i)=>{
+    h.id='h'+i;
+    const lv=+h.tagName[1]-base, g=document.createElement('div');
+    g.className='g'; g.dataset.lv=lv;
+    g.innerHTML='<div class="tr"><span class="sp"></span><a data-i="'+i+'">'+esc(hLabel(h))+'</a></div>';
+    while(stack.length&&stack[stack.length-1].lv>=lv) stack.pop();
+    const parent=stack.length?stack[stack.length-1]:null;
+    if(parent){
+      if(!parent.kids){ parent.kids=document.createElement('div'); parent.kids.className='kids'; parent.g.appendChild(parent.kids);
+        const sp=parent.g.querySelector('.sp'); const b=document.createElement('button'); b.className='tw'; b.setAttribute('aria-expanded','false'); b.title='พับ / คลี่'; sp.replaceWith(b); }
+      parent.kids.appendChild(g);
+    } else root.appendChild(g);
+    stack.push({lv,g,kids:null});
+  });
+  const t=$('#toc');
+  t.innerHTML='<div class="tools"><button data-act="open">คลี่ทั้งหมด</button><button data-act="close">พับทั้งหมด</button></div>';
+  if(!hs.length){ t.insertAdjacentHTML('beforeend','<div class="em">ไม่พบหัวข้อ</div>'); return; }
+  t.appendChild(root);
+  if(!$$('.tw',t).length) $('.tools',t).hidden=true; // nothing to fold
+}
+function setOpen(g,open){ g.classList.toggle('open',open); const b=g.querySelector(':scope>.tr>.tw'); if(b) b.setAttribute('aria-expanded',open); }
+// index of the heading the reader is at now (last heading at or above the top of the view)
+function currentHeading(){
+  const hs=$$('#article '+TOC_SEL.split(',').join(',#article ')); let cur=-1;
+  if(S.mode==='a4'||!hs.length) return -1;
+  if(S.view==='scroll') hs.forEach((h,i)=>{ if(h.getBoundingClientRect().top<=var_bar()+40) cur=i; });
+  else hs.forEach((h,i)=>{ if(h.offsetLeft<(page+1)*step-1) cur=i; });
+  return cur;
+}
+// opening the panel: fold everything except the path to where the reader is, and show that spot
+function syncToc(){
+  const t=$('#toc'); $$('.g',t).forEach(g=>setOpen(g,false));
+  $$('.tr.cur',t).forEach(r=>r.classList.remove('cur'));
+  const c=currentHeading(); const a=c>=0&&t.querySelector('a[data-i="'+c+'"]'); if(!a) return;
+  a.parentElement.classList.add('cur');
+  for(let g=a.closest('.g').parentElement.closest('.g'); g; g=g.parentElement.closest('.g')) setOpen(g,true);
+  const own=a.closest('.g'); if(own.querySelector(':scope>.kids')&&own.dataset.lv==='0') setOpen(own,true);
+  t.scrollTop=a.offsetTop-t.clientHeight/3;
 }
 $('#toc').onclick=e=>{
+  const tw=e.target.closest('.tw'); if(tw){ const g=tw.closest('.g'); setOpen(g,!g.classList.contains('open')); return; }
+  const act=e.target.closest('.tools button'); if(act){ $$('#toc .g').forEach(g=>{ if(g.querySelector(':scope>.kids')) setOpen(g,act.dataset.act==='open'); }); return; }
   const a=e.target.closest('a[data-i]'); if(!a) return;
   const h=document.getElementById('h'+a.dataset.i); $('#toc').hidden=true;
-  if(S.mode==='a4'){ // find heading in iframe by text
-    try{const d=$('#frame').contentDocument;const t=h.textContent.trim();
-      const el=[...d.querySelectorAll('h2,h3')].find(x=>x.textContent.trim()===t);
-      if(el){const sc=Math.min(1,innerWidth/840);scrollTo({top:(el.getBoundingClientRect().top+d.defaultView.scrollY)*sc+var_bar()-8,behavior:'smooth'})}}catch(_){}
+  if(S.mode==='a4'){ // the A4 document lives in the iframe: match the heading by its position among the headings (titles like "สรุป" repeat in every chapter), by text as a fallback
+    try{const d=$('#frame').contentDocument;
+      const list=[...d.querySelectorAll(TOC_SEL)];
+      const t=h.textContent.trim(), i=+a.dataset.i;
+      const el=list.length===$$('#article '+TOC_SEL.split(',').join(',#article ')).length?list[i]:list.find(x=>x.textContent.trim()===t);
+      if(el){const sc=S.zoom?S.zoom/100:Math.min(1,innerWidth/840);{const top=(el.getBoundingClientRect().top+d.defaultView.scrollY)*sc+var_bar()-8;scrollTo({top,behavior:Math.abs(top-scrollY)>innerHeight*3?'auto':'smooth'})}}}catch(_){}
     return;
   }
-  if(S.view==='scroll') h.scrollIntoView({behavior:'smooth',block:'start'});
+  if(S.view==='scroll') h.scrollIntoView({behavior:Math.abs(h.getBoundingClientRect().top)>innerHeight*3?'auto':'smooth',block:'start'}); // a long way (a big book) jumps at once
   else{ const art=$('#article'), x=h.offsetLeft; goPage(Math.floor(x/step)); }
 };
 /* ---------- export: viewer + document in one self-contained .html ---------- */
