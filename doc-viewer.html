@@ -146,7 +146,7 @@ body.unpinned #zone{display:block}
 </style>
 </head>
 <body data-theme="light">
-<script>try{var _t=JSON.parse(localStorage.getItem('docviewer')||'{}').theme;if(_t)document.body.dataset.theme=_t}catch(e){}</script>
+<script>try{var _t=JSON.parse(localStorage.getItem('docviewer')||'{}').theme;if(_t&&!document.body.classList.contains('embedded'))document.body.dataset.theme=_t}catch(e){}</script>
 
 <header class="bar">
   <button id="btnToc" title="สารบัญ" aria-label="สารบัญ" hidden>☰</button>
@@ -209,7 +209,16 @@ body.unpinned #zone{display:block}
 const PRISTINE='<!doctype html>\n'+document.documentElement.outerHTML; // untouched copy of this page, used by "export as one file"
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const S={pin:true,theme:'light',fs:18,lh:1.8,w:700,font:"'Sarabun',sans-serif",view:'scroll',mode:'a4'};
-const store={get(){try{return JSON.parse(localStorage.getItem('docviewer')||'{}')}catch(_){return {}}},set(){try{localStorage.setItem('docviewer',JSON.stringify(S))}catch(_){}}};
+/* exported file: the exporter's settings are the starting point; whatever the reader changes is remembered per document */
+const EMB=document.getElementById('embedded-doc');
+let storeKey='docviewer';
+if(EMB){
+  const t=EMB.textContent, tag=t.length+':'+t.slice(0,120)+t.slice(-120); let h=5381;
+  for(let i=0;i<tag.length;i++) h=((h<<5)+h+tag.charCodeAt(i))|0;
+  storeKey='docviewer-emb:'+(h>>>0).toString(36);
+  try{Object.assign(S,JSON.parse(EMB.dataset.settings||'{}'))}catch(_){}
+}
+const store={get(){try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch(_){return {}}},set(){try{localStorage.setItem(storeKey,JSON.stringify(S))}catch(_){}}};
 Object.assign(S,store.get());
 let srcText='',meta={title:'',series:''},page=0,pages=1,step=0,frameDirty=false;
 function ensureFrame(){ if(frameDirty){ frameDirty=false; $('#frame').srcdoc=srcText; } }
@@ -332,6 +341,19 @@ addEventListener('keydown',e=>{
   if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();goPage(page+1)}
   if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();goPage(page-1)}
 });
+/* mouse wheel / trackpad turns pages in paged view: one flip per scroll gesture (trackpad inertia is ignored) */
+let lastWheel=0, lastFlip=0, lastAbs=0;
+$('#reader').addEventListener('wheel',e=>{
+  if(S.mode!=='reader'||S.view!=='paged'||e.ctrlKey) return;
+  e.preventDefault();
+  const now=performance.now(), d=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX, a=Math.abs(d);
+  const gap=now-lastWheel, prev=lastAbs; lastWheel=now; lastAbs=a;
+  if(a<4||now-lastFlip<420) return;                       // let the page-turn animation finish
+  const notch=a>=100&&Number.isInteger(d)&&e.deltaMode===0; // classic mouse wheel: every click turns a page
+  const fresh=gap>120||a>prev*1.6;                           // trackpad: a new swipe starts after a short pause or a clear push; inertia (decaying) is ignored
+  if(!notch&&!fresh) return;
+  lastFlip=now; goPage(page+(d>0?1:-1));
+},{passive:false});
 let rz; addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(S.mode==='a4')fitA4();else if(S.view==='paged')layoutPaged()},150)});
 function change(fn){fn();applyReader()}
 $('#fsUp').onclick=()=>change(()=>S.fs=Math.min(30,S.fs+1));
@@ -398,7 +420,7 @@ function buildSingle(){
   const d=new DOMParser().parseFromString(PRISTINE,'text/html');
   d.querySelectorAll('#embedded-doc').forEach(e=>e.remove());
   // the exported file starts as a ready-made reader: drop the "open a file" screen so it never flashes while the document loads
-  d.body.classList.add('embedded'); d.body.setAttribute('data-theme','light');
+  d.body.classList.add('embedded'); d.body.setAttribute('data-theme',S.theme); if(!S.pin) d.body.classList.add('unpinned');
   const emp=d.getElementById('empty'); emp.hidden=true; emp.innerHTML='';
   d.getElementById('ttl').innerHTML=esc(meta.title)+(meta.series?'<small>'+esc(meta.series)+'</small>':'');
   ['#btnToc','#modeSeg','#btnAa','#btnPrint'].forEach(q=>d.querySelector(q).hidden=false);
@@ -407,7 +429,7 @@ function buildSingle(){
   d.getElementById('btnPrint').style.visibility=S.mode==='a4'?'visible':'hidden';
   const s=d.createElement('script');
   s.type='application/octet-stream'; s.id='embedded-doc';
-  s.setAttribute('data-name',meta.title); s.setAttribute('data-mode',S.mode); s.setAttribute('data-view',S.view);
+  s.setAttribute('data-name',meta.title); s.setAttribute('data-settings',JSON.stringify(S)); // theme, font, size, spacing, width, reading style, mode, menu bar
   s.textContent=toB64(srcText);
   d.body.insertBefore(s,d.querySelector('script:not([id])')); // must exist before the viewer script runs
   d.title=meta.title+(meta.series?' · '+meta.series:'');
@@ -431,8 +453,6 @@ applyReader();
   const e=document.getElementById('embedded-doc'); if(!e) return;
   document.body.classList.add('embedded'); // exported single file: no "export" / "open file" buttons
   try{
-    if(e.dataset.mode) S.mode=e.dataset.mode;
-    if(e.dataset.view) S.view=e.dataset.view;
     loadText(fromB64(e.textContent.trim()),e.dataset.name);
   }catch(_){}
 })();
